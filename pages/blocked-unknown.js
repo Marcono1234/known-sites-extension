@@ -82,15 +82,15 @@ function createSanitizedDomainForTitle(domain) {
 /**
  * @typedef HighlightResult
  * @type {object}
- * @property {string} encodedDomainHtml
- * @property {string} decodedDomainHtml
+ * @property {string} sanitizedDomainHtml
+ * @property {string} originalDomainHtml
  * 
  * @param {string} domain 
  * @returns {?HighlightResult}
  */
 function createHighlightedDomain(domain) {
-    let encodedResultHtml = ''
-    let decodedResultHtml = ''
+    let sanitizedResultHtml = ''
+    let originalResultHtml = ''
     let hasNonAscii = false
     // Used to track spans of multiple non-ASCII chars 
     let wasLastNonAscii = false
@@ -102,15 +102,15 @@ function createHighlightedDomain(domain) {
         // Check if ASCII
         if (isAscii(codepoint)) {
             const toAdd = (wasLastNonAscii ? '</span>' : '') + escapedChar
-            encodedResultHtml += toAdd
-            decodedResultHtml += toAdd
+            sanitizedResultHtml += toAdd
+            originalResultHtml += toAdd
 
             wasLastNonAscii = false
         } else {
             hasNonAscii = true
             const prefix = (wasLastNonAscii ? '' : '<span class="non-ascii-char">')
-            encodedResultHtml += prefix + '?'
-            decodedResultHtml += prefix + escapedChar
+            sanitizedResultHtml += prefix + '?'
+            originalResultHtml += prefix + escapedChar
 
             wasLastNonAscii = true
         }
@@ -118,13 +118,13 @@ function createHighlightedDomain(domain) {
 
     if (wasLastNonAscii) {
         const toAdd = '</span>'
-        encodedResultHtml += toAdd
-        decodedResultHtml += toAdd
+        sanitizedResultHtml += toAdd
+        originalResultHtml += toAdd
     }
 
     return hasNonAscii ? {
-        encodedDomainHtml: encodedResultHtml,
-        decodedDomainHtml: decodedResultHtml,
+        sanitizedDomainHtml: sanitizedResultHtml,
+        originalDomainHtml: originalResultHtml,
     } : null
 }
 
@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         domainPlaceholder.textContent = domainValue
     } else {
         // Initially show encoded representation
-        domainPlaceholder.innerHTML = highlightedDomainHtmls.encodedDomainHtml
+        domainPlaceholder.innerHTML = highlightedDomainHtmls.sanitizedDomainHtml
         for (const element of document.getElementsByClassName('non-ascii-domain')) {
             // Show warning element
             element.classList.remove('hidden')
@@ -193,7 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const toggleCheckbox = document.getElementById('original-domain-toggle-checkbox')
         toggleCheckbox.addEventListener('change', event => {
             // @ts-ignore
-            let newHtml = event.target.checked === true ? highlightedDomainHtmls.decodedDomainHtml : highlightedDomainHtmls.encodedDomainHtml
+            const isChecked = event.target.checked === true
+            const newHtml = isChecked ? highlightedDomainHtmls.originalDomainHtml : highlightedDomainHtmls.sanitizedDomainHtml
             domainPlaceholder.innerHTML = newHtml
         })
     }

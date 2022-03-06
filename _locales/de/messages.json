@@ -1,0 +1,57 @@
+{
+  "manifest_extension_description": {
+    "message": "Blockiert Webseiten, die der Nutzer / die Nutzerin vorher noch nie geöffnet hatte."
+  },
+
+  "blocked_window_title": {
+    "message": "Blockiert – $DOMAIN$",
+    "placeholders": {
+      "domain": {
+        "content": "$1"
+      }
+    }
+  },
+
+  "blocked_header_logo_alt": {
+    "message": "Logo"
+  },
+  "blocked_header": {
+    "message": "Unbekannte Webseite blockiert"
+  },
+
+  "blocked_warning_text": {
+    "message": "Du versuchst eine Webseite zu öffnen, die du vorher noch nie besucht hattest. Bitte stelle sicher, dass du wirklich diese Webseite öffnen willst; es könnte sich um einen Phishing-Angriff handeln."
+  },
+  "blocked_warning_open_question": {
+    "message": "Möchstest du diese Webseite öffnen?"
+  },
+
+  "blocked_toggle_original_domain_label": {
+    "message": "Ursprüngliche Domain umschalten"
+  },
+  "blocked_toggle_original_domain_title": {
+    "message": "Klicke zum Umschalten"
+  },
+
+  "blocked_non_ascii_warning_text": {
+    "message": "Die Domain der Webseite benutzt Sonderzeichen (hier ersetzt mit $NON_ASCII$), diese werden manchmal verwendet um <b>Nutzer zu täuschen</b>. Klicke auf das $EYE_ICON$ Icon um die ursprüngliche Domain anzuzeigen, aber bitte beachte, dass manche Sonderzeichen komplett die Art und Weise ändern können, wie der Text dargestellt wird, z.B. durch Änderung der Textrichtung.",
+    "placeholders": {
+      "non_ascii": {
+        "content": "<span class=\"non-ascii-char\">?</span>"
+      },
+      "eye_icon": {
+        "content": "<img class=\"eye-icon-in-text\" alt=\"Icon ursprüngliche Domain umschalten\" />"
+      }
+    }
+  },
+
+  "blocked_button_open": {
+    "message": "Öffnen"
+  },
+  "blocked_button_back": {
+    "message": "Zurück zu vorheriger Webseite"
+  },
+  "blocked_button_close_tab": {
+    "message": "Tab schließen"
+  }
+}

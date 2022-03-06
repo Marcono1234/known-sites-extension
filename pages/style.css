@@ -76,7 +76,6 @@ h1 {
 .button-bar {
   display: flex;
   justify-content: space-evenly;
-  align-items: center;
 }
 
 button {

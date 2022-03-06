@@ -29,13 +29,13 @@
     "message": "Do you want to open this website?"
   },
 
-  "blocked_toggle_decoded_domain_label": {
-    "message": "Toggle decoded domain",
-    "description": "Label of the button toggling the decoded domain."
+  "blocked_toggle_original_domain_label": {
+    "message": "Toggle original domain",
+    "description": "Label of the button toggling the original domain."
   },
-  "blocked_toggle_decoded_domain_title": {
+  "blocked_toggle_original_domain_title": {
     "message": "Click to toggle",
-    "description": "Hover title of the button toggling the decoded domain."
+    "description": "Hover title of the button toggling the original domain."
   },
 
   "blocked_non_ascii_warning_text": {
@@ -45,7 +45,7 @@
         "content": "<span class=\"non-ascii-char\">?</span>"
       },
       "eye_icon": {
-        "content": "<img class=\"eye-icon-in-text\" alt=\"Toggle decoded domain icon\" />"
+        "content": "<img class=\"eye-icon-in-text\" alt=\"Toggle original domain icon\" />"
       }
     }
   },
