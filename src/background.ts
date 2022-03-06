@@ -234,10 +234,8 @@ async function handleRequest(
   // Firefox already seems to provide this in punycode
   const rawDomain = parseDomain(url)
   let nonPunycodeDomain: string
-  let punycodeDomain: string
   try {
     nonPunycodeDomain = punycode.toUnicode(rawDomain)
-    punycodeDomain = punycode.toASCII(rawDomain)
   } catch (e) {
     console.error(`Punycode conversion failed for domain ${rawDomain}`, e)
     // If conversion failed; domain might be malformed and handling of it might be
@@ -252,7 +250,7 @@ async function handleRequest(
     console.info(`Blocking unknown domain ${rawDomain}`)
     const blockingPageUrl = browser.runtime.getURL(
       // prettier-ignore
-      `pages/blocked-unknown.html?url=${encodeURIComponent(url)}&domain=${encodeURIComponent(nonPunycodeDomain)}&punycodeDomain=${encodeURIComponent(punycodeDomain)}&rawDomain=${rawDomain}`
+      `pages/blocked-unknown.html?url=${encodeURIComponent(url)}&domain=${encodeURIComponent(nonPunycodeDomain)}&rawDomain=${rawDomain}`
     )
 
     // Cannot return blocking page URL in `redirectUrl` because Firefox already records original URL in history

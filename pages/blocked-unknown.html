@@ -20,17 +20,18 @@
         <p class="open-question">Do you want to open this website?</p>
         <div class="domain-container">
             <div id="domain-placeholder"></div>
-            <div id="decoded-domain-checkbox-container" class="punycode-difference hidden">
-                <input type="checkbox" id="decoded-domain-checkbox" aria-label="Toggle decoded domain">
+            <div class="non-ascii-domain hidden">
+                <input type="checkbox" id="original-domain-toggle-checkbox" aria-label="Toggle decoded domain">
                 <!-- Replace checkbox icon, see https://stackoverflow.com/a/59573635 -->
-                <label for="decoded-domain-checkbox" title="Click to toggle"></label>
+                <label for="original-domain-toggle-checkbox" title="Click to toggle"></label>
             </div>
         </div>
-        <p class="punycode-difference warning-text hidden">
-            The value shown here might differ from what you have seen in your browser address bar, or in the link you
-            clicked. The domain uses non-ASCII characters which are sometimes used to <b>deceive users</b>. It is shown
-            here in an <a href="https://en.wikipedia.org/wiki/Punycode">encoded format</a>. To view the decoded domain,
-            click the <img class="eye-icon-in-text" alt="Toggle decoded domain icon" /></span> icon.
+        <p class="non-ascii-domain warning-text hidden">
+            The domain of the website uses special characters (replaced here with
+            <span class="non-ascii-char">?</span>), this is sometimes used to <b>deceive users</b>.
+            To view the original domain, click the
+            <img class="eye-icon-in-text" alt="Toggle decoded domain icon" /></span> icon, but note that certain
+            characters might completely change the way the text is displayed, such as changing the text direction.
         </p>
         <p class=" button-bar">
             <button id="open-button" type="button">Open</button>
