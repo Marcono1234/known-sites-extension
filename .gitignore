@@ -1,2 +1,8 @@
 /node_modules
-/dist
+/typescript-src/node_modules
+
+# Output directories of compiled TypeScript files
+/extension/background-scripts
+
+# Generated extension artifact
+/web-ext-artifacts

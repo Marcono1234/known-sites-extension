@@ -1,14 +1,14 @@
 {
     "compilerOptions": {
         "outDir": "out",
-        "rootDir": "src",
+        "rootDir": ".",
         "sourceMap": true,
         "strict": true,
         "module": "es6",
         "target": "es6",
     },
     "include": [
-        "src"
+        "background-scripts"
     ],
     "exclude": [
         "node_modules"
