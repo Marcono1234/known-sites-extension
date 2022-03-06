@@ -1,0 +1,65 @@
+{
+  "manifest_extension_description": {
+    "message": "Blocks websites which the user had not opened before."
+  },
+
+  "blocked_window_title": {
+    "message": "Blocked – $DOMAIN$",
+    "placeholders": {
+      "domain": {
+        "content": "$1",
+        "example": "example.com"
+      }
+    }
+  },
+
+  "blocked_header_logo_alt": {
+    "message": "Logo",
+    "description": "img alt text of the logo on the blocked page."
+  },
+  "blocked_header": {
+    "message": "Unknown Website Blocked",
+    "description": "Header text of the blocked page."
+  },
+
+  "blocked_warning_text": {
+    "message": "You are trying to open a website which you have not opened before. Please verify that you really want to open this website; this might be a phishing attack."
+  },
+  "blocked_warning_open_question": {
+    "message": "Do you want to open this website?"
+  },
+
+  "blocked_toggle_decoded_domain_label": {
+    "message": "Toggle decoded domain",
+    "description": "Label of the button toggling the decoded domain."
+  },
+  "blocked_toggle_decoded_domain_title": {
+    "message": "Click to toggle",
+    "description": "Hover title of the button toggling the decoded domain."
+  },
+
+  "blocked_non_ascii_warning_text": {
+    "message": "The domain of the website uses special characters (replaced here with $NON_ASCII$), this is sometimes used to <b>deceive users</b>. To view the original domain, click the $EYE_ICON$ icon, but note that certain characters might completely change the way the text is displayed, such as changing the text direction.",
+    "placeholders": {
+      "non_ascii": {
+        "content": "<span class=\"non-ascii-char\">?</span>"
+      },
+      "eye_icon": {
+        "content": "<img class=\"eye-icon-in-text\" alt=\"Toggle decoded domain icon\" />"
+      }
+    }
+  },
+
+  "blocked_button_open": {
+    "message": "Open",
+    "description": "Text of button for opening the blocked website."
+  },
+  "blocked_button_back": {
+    "message": "Go back",
+    "description": "Text of button for going back to the previous website."
+  },
+  "blocked_button_close_tab": {
+    "message": "Close tab",
+    "description": "Text of button for closing the tab."
+  }
+}

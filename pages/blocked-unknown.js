@@ -1,5 +1,44 @@
 "use strict;"
 
+// Based on https://github.com/EFForg/https-everywhere/blob/579b8c59d078fd65d547a546b381c9ae45c61232/chromium/pages/translation.js
+function setI18nContent() {
+    // Set translated text based on data attributes
+    /**
+     * @callback i18nCallback
+     * @param {HTMLElement} element
+     * @param {string} translatedMessage
+     */
+    /**
+     * @param {string} dataSuffix
+     * @param {i18nCallback} callback
+     */
+    function setI18nContent(dataSuffix, callback) {
+        const attrName = 'data-i18n' + (dataSuffix === '' ? '' : ('-' + dataSuffix))
+
+        for (const element of document.querySelectorAll(`[${attrName}]`)) {
+            const attrValue = element.getAttribute(attrName)
+            if (attrValue === null) {
+                console.error(`Missing attribute ${attrName}`, element)
+                continue
+            }
+
+            const message = browser.i18n.getMessage(attrValue)
+            if (message === '') {
+                console.error(`Missing translation for ${attrValue}`)
+            } else {
+                // @ts-ignore
+                callback(element, message)
+            }
+        }
+    }
+
+    setI18nContent('', (element, message) => element.textContent = message)
+    setI18nContent('html', (element, message) => element.innerHTML = message)
+    setI18nContent('title', (element, message) => element.title = message)
+    setI18nContent('img-alt', (element, message) => element.setAttribute('alt', message))
+    setI18nContent('aria-label', (element, message) => element.setAttribute('aria-label', message))
+}
+
 // From https://stackoverflow.com/a/6234804
 /**
  * @param {string} input 
@@ -7,11 +46,11 @@
  */
 function escapeHtml(input) {
     return input
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;")
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
 }
 
 /**
@@ -96,8 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const domainValue = params.get('domain')
     const rawDomainValue = params.get('rawDomain')
 
+    setI18nContent()
     // Sanitize domain to avoid having it interfere with title, e.g. due to right-to-left override
-    document.title = `Blocked - ${createSanitizedDomainForTitle(domainValue)}`
+    document.title = browser.i18n.getMessage('blocked_window_title', createSanitizedDomainForTitle(domainValue))
 
     const openButton = document.getElementById('open-button')
     openButton.addEventListener('click', () => {
@@ -118,10 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let revertButtonAction
 
     if (history.length > 1) {
-        revertButtonText = 'Go back'
+        revertButtonText = browser.i18n.getMessage('blocked_button_back')
         revertButtonAction = () => history.back()
     } else {
-        revertButtonText = 'Close tab'
+        revertButtonText = browser.i18n.getMessage('blocked_button_close_tab')
         revertButtonAction = () => {
             // window.close() only seems to work when tab was opened by script
             // Therefore let extension close the tab

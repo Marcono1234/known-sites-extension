@@ -1,8 +1,14 @@
 {
   "manifest_version": 2,
   "name": "Known Sites",
-  "description": "Blocks websites which the user had not opened before.",
-  "version": "1.0",
+  "description": "__MSG_manifest_extension_description__",
+  "default_locale": "en",
+  "version": "1.0.0",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "known-sites@marcono1234.invalid"
+    }
+  },
   "icons": {
     "48": "icon.svg",
     "96": "icon.svg"
@@ -15,7 +21,8 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["dist/background.js"]
+    "scripts": ["dist/background.js"],
+    "persistent": true
   },
   "web_accessible_resources": ["pages/blocked-unknown.html", "icon.svg"]
 }

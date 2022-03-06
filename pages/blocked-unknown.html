@@ -11,30 +11,29 @@
 <body>
     <main>
         <header>
-            <h1><img src="/icon.svg" alt="Logo" class="logo">Unknown Website Blocked</h1>
+            <h1>
+                <img src="/icon.svg" class="logo" data-i18n-img-alt="blocked_header_logo_alt">
+                <span data-i18n="blocked_header"></span>
+            </h1>
         </header>
-        <p class="warning-text">
-            You are trying to open a website which you have not opened before. Please verify that you really want to
-            open this website; this might be a phishing attack.
-        </p>
-        <p class="open-question">Do you want to open this website?</p>
+
+        <p class="warning-text" data-i18n="blocked_warning_text"></p>
+
+        <p class="open-question" data-i18n="blocked_warning_open_question"></p>
         <div class="domain-container">
             <div id="domain-placeholder"></div>
             <div class="non-ascii-domain hidden">
-                <input type="checkbox" id="original-domain-toggle-checkbox" aria-label="Toggle decoded domain">
+                <input type="checkbox" id="original-domain-toggle-checkbox"
+                    data-i18n-aria-label="blocked_toggle_decoded_domain_label">
                 <!-- Replace checkbox icon, see https://stackoverflow.com/a/59573635 -->
-                <label for="original-domain-toggle-checkbox" title="Click to toggle"></label>
+                <label for="original-domain-toggle-checkbox"
+                    data-i18n-title="blocked_toggle_decoded_domain_title"></label>
             </div>
         </div>
-        <p class="non-ascii-domain warning-text hidden">
-            The domain of the website uses special characters (replaced here with
-            <span class="non-ascii-char">?</span>), this is sometimes used to <b>deceive users</b>.
-            To view the original domain, click the
-            <img class="eye-icon-in-text" alt="Toggle decoded domain icon" /></span> icon, but note that certain
-            characters might completely change the way the text is displayed, such as changing the text direction.
-        </p>
+
+        <p class="non-ascii-domain warning-text hidden" data-i18n-html="blocked_non_ascii_warning_text"></p>
         <p class=" button-bar">
-            <button id="open-button" type="button">Open</button>
+            <button id="open-button" type="button" data-i18n="blocked_button_open"></button>
             <button id="revert-button" type="button"></button>
         </p>
     </main>

@@ -1,3 +1,6 @@
-- Internationalization
-    https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Internationalization
-    https://github.com/EFForg/https-everywhere/blob/0a5edc8a4cb2c8f14ba2c327124e219e2a660b7e/chromium/pages/translation.js
+- Support other browsers
+    https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Chrome_incompatibilities
+    https://github.com/mozilla/webextension-polyfill
+
+- ? Maybe use `incognito: split` once supported by Firefox
+    https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/incognito
