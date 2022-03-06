@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "Known Sites",
+  "description": "Blocks websites which the user had not opened before.",
+  "version": "1.0",
+  "icons": {
+    "48": "icon.svg",
+    "96": "icon.svg"
+  },
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "history",
+    "bookmarks",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["dist/background.js"]
+  },
+  "web_accessible_resources": ["pages/blocked-unknown.html", "icon.svg"]
+}

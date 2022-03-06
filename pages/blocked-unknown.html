@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <script src="blocked-unknown.js"></script>
+    <link href="style.css" rel="stylesheet">
+    <link rel="icon" href="/icon.svg" sizes="any" type="image/svg+xml">
+</head>
+
+<body>
+    <main>
+        <header>
+            <h1><img src="/icon.svg" alt="Logo" class="logo">Unknown Website Blocked</h1>
+        </header>
+        <p class="warning-text">
+            You are trying to open a website which you have not opened before. Please verify that you really want to
+            open this website; this might be a phishing attack.
+        </p>
+        <p class="open-question">Do you want to open this website?</p>
+        <div class="domain-container">
+            <div id="domain-placeholder"></div>
+            <div id="decoded-domain-checkbox-container" class="punycode-difference hidden">
+                <input type="checkbox" id="decoded-domain-checkbox" aria-label="Toggle decoded domain">
+                <!-- Replace checkbox icon, see https://stackoverflow.com/a/59573635 -->
+                <label for="decoded-domain-checkbox" title="Click to toggle"></label>
+            </div>
+        </div>
+        <p class="punycode-difference warning-text hidden">
+            The value shown here might differ from what you have seen in your browser address bar, or in the link you
+            clicked. The domain uses non-ASCII characters which are sometimes used to <b>deceive users</b>. It is shown
+            here in an <a href="https://en.wikipedia.org/wiki/Punycode">encoded format</a>. To view the decoded domain,
+            click the <img class="eye-icon-in-text" alt="Toggle decoded domain icon" /></span> icon.
+        </p>
+        <p class=" button-bar">
+            <button id="open-button" type="button">Open</button>
+            <button id="revert-button" type="button"></button>
+        </p>
+    </main>
+</body>
+
+</html>

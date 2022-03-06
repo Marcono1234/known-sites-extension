@@ -1,0 +1,135 @@
+* {
+  font-family: ui-sans-serif, Arial, Helvetica, sans-serif;
+}
+
+main {
+  max-width: 40em;
+  height: 70%;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-left: 40px;
+  padding-right: 40px;
+
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+
+  border-color: #72b5f7;
+  border-style: solid;
+  border-width: 5px;
+  border-radius: 10px;
+
+  font-size: 1.1em;
+}
+
+.logo {
+  width: 45px;
+  margin-left: 7px;
+  margin-right: 7px;
+  vertical-align: text-bottom;
+}
+
+h1 {
+  text-align: center;
+}
+
+.warning-text {
+  text-align: justify;
+}
+.open-question {
+  text-align: center;
+}
+
+.domain-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+}
+
+#domain-placeholder {
+  /** Prefer sans-serif monospace fonts */
+  font-family: Consolas, Noto Mono, ui-monospace, monospace;
+  font-size: 1.15em;
+  text-align: center;
+
+  background-color: #f7f7f7;
+  border-radius: 10px;
+
+  display: inline-block;
+  min-width: 40%;
+  padding: 10px;
+}
+
+.button-bar {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+button {
+  font-size: 1em;
+  padding: 8px;
+  margin: 10px;
+  width: 30%;
+
+  border-radius: 10px;
+  border-width: 2px;
+  border-style: outset;
+  border-color: hsl(0, 0%, 92%);
+
+  background-color: hsl(0, 0%, 87%);
+}
+button:hover {
+  background-color: hsl(0, 0%, 92%);
+}
+button:active {
+  border-style: inset;
+}
+
+#open-button {
+  border-color: hsl(0, 100%, 75%);
+  background-color: hsl(0, 100%, 66%);
+}
+#open-button:hover {
+  background-color: hsl(0, 100%, 75%);
+}
+
+.hidden {
+  display: none;
+}
+
+:root {
+  /* https://icons.getbootstrap.com/icons/eye/ */
+  --eye-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>');
+  /* https://icons.getbootstrap.com/icons/eye-slash/ */
+  --eye-slash-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/><path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12-.708.708z"/></svg>');
+}
+
+.eye-icon-in-text {
+  content: var(--eye-icon);
+  width: 1em;
+  vertical-align: text-bottom;
+}
+
+/* Replace checkbox icon, see https://stackoverflow.com/a/59573635 */
+#decoded-domain-checkbox {
+  display: none;
+}
+
+#decoded-domain-checkbox + label:before {
+  display: inline-block;
+  height: 30px;
+  width: 30px;
+  margin: 5px;
+
+  vertical-align: middle;
+  cursor: pointer;
+
+  content: var(--eye-icon);
+}
+
+#decoded-domain-checkbox:checked + label:before {
+  content: var(--eye-slash-icon);
+}
