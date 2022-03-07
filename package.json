@@ -4,7 +4,7 @@
     "watch": "cd typescript-src && npm run watch",
     "debug": "web-ext run --source-dir extension",
     "lint": "web-ext lint --source-dir extension",
-    "package": "npm install && cd typescript-src && npm install && npm run build && cd .. && web-ext build --overwrite-dest --source-dir extension"
+    "package": "npm clean-install && cd typescript-src && npm clean-install && npm run build && cd .. && web-ext build --overwrite-dest --source-dir extension"
   },
   "devDependencies": {
     "web-ext": "^6.7.0",
