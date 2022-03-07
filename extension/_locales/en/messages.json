@@ -3,6 +3,16 @@
     "message": "Blocks websites which the user had not opened before."
   },
 
+  "browser_action_title": {
+    "message": "$NAME$ (active)",
+    "description": "Title shown for the extension browser action (in the browser toolbar).",
+    "placeholders": {
+      "name": {
+        "content": "Known Sites"
+      }
+    }
+  },
+
   "blocked_window_title": {
     "message": "Blocked – $DOMAIN$",
     "placeholders": {

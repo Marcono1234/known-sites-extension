@@ -3,6 +3,15 @@
     "message": "Blockiert Webseiten, die der Nutzer / die Nutzerin vorher noch nie geöffnet hatte."
   },
 
+  "browser_action_title": {
+    "message": "$NAME$ (aktiv)",
+    "placeholders": {
+      "name": {
+        "content": "Known Sites"
+      }
+    }
+  },
+
   "blocked_window_title": {
     "message": "Blockiert – $DOMAIN$",
     "placeholders": {
