@@ -7,10 +7,10 @@
     "package": "npm install && cd typescript-src && npm install && npm run build && cd .. && web-ext build --overwrite-dest --source-dir extension"
   },
   "devDependencies": {
-    "web-ext": "^5.4.1",
-    "@types/firefox-webext-browser": "^82.0.0",
-    "eslint": "^7.17.0",
-    "prettier": "^2.1.2"
+    "web-ext": "^6.7.0",
+    "@types/firefox-webext-browser": "^94.0.1",
+    "eslint": "^8.10.0",
+    "prettier": "^2.5.1"
   },
   "dependencies": {},
   "prettier": {
