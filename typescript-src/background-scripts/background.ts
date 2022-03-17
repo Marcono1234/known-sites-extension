@@ -102,8 +102,32 @@ browser.runtime.onMessage.addListener((message: MessageData, sender) => {
 })
 
 function parseDomain(url: string): string {
-  const hostname = new URL(url).hostname
-  return psl.get(hostname) || hostname
+  let hostname
+  try {
+    hostname = new URL(url).hostname
+  } catch (typeError) {
+    console.error(`Failed parsing URL ${url}`, typeError)
+    // Fall back to using complete URL as domain
+    return url
+  }
+  if (hostname === '') {
+    console.error(`URL ${url} has no hostname`)
+    // Fall back to using complete URL as domain
+    return url
+  }
+
+  const pslDomain = psl.get(hostname)
+
+  if (pslDomain === null) {
+    return hostname
+  }
+  // Sanity check to verify that PSL domain matches hostname
+  else if (pslDomain === hostname || hostname.endsWith('.' + pslDomain)) {
+    return pslDomain
+  } else {
+    console.warn(`PSL domain ${pslDomain} does not match hostname ${hostname}`)
+    return hostname
+  }
 }
 
 function parseOrigin(url: string): string {
