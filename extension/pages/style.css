@@ -113,6 +113,7 @@ button:active {
 }
 
 .eye-icon-in-text {
+  display: inline-block;
   content: var(--eye-icon);
   width: 1em;
   vertical-align: text-bottom;

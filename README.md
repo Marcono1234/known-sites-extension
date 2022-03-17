@@ -39,6 +39,7 @@ time differentiates between subdomains when their content is user controlled.
 
 ## Supported Browsers
 
+- Chrome Desktop
 - Firefox Desktop
 
 Other browsers might not support all features needed by this extension.
@@ -56,7 +57,7 @@ Other browsers might not support all features needed by this extension.
 2. In a separate terminal, run:
 
    ```bash
-   npm run debug
+   npm run debug-firefox
    ```
 
    This will launch a development browser Firefox browser and automatically apply changes made to the extension resources.

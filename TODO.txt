@@ -1,9 +1,5 @@
 - Sign add-on
     https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/
 
-- Support other browsers
-    https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Chrome_incompatibilities
-    https://github.com/mozilla/webextension-polyfill
-
 - ? Maybe use `incognito: split` once supported by Firefox
     https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/incognito

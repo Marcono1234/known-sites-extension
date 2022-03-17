@@ -2,13 +2,13 @@
   "private": true,
   "scripts": {
     "watch": "cd typescript-src && npm run watch",
-    "debug": "web-ext run --source-dir extension",
+    "debug-firefox": "web-ext run --source-dir extension --target firefox-desktop",
+    "debug-chromium": "web-ext run --source-dir extension --target chromium",
     "lint": "web-ext lint --source-dir extension",
     "package": "npm clean-install && cd typescript-src && npm clean-install && npm run build && cd .. && web-ext build --overwrite-dest --source-dir extension"
   },
   "devDependencies": {
     "web-ext": "^6.7.0",
-    "@types/firefox-webext-browser": "^94.0.1",
     "eslint": "^8.10.0",
     "prettier": "^2.5.1"
   },

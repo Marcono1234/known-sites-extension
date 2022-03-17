@@ -2,7 +2,25 @@ import * as psl from 'psl'
 import * as LRUCache from 'lru-cache'
 // Use trailing slash to avoid import Node module
 import * as punycode from 'punycode/'
-import HistoryItem = browser.history.HistoryItem
+
+const IS_FIREFOX: Promise<boolean> = (
+  browser.runtime.getBrowserInfo === undefined
+    ? Promise.resolve(false)
+    : browser.runtime.getBrowserInfo().then(
+        (browserInfo) => {
+          const browserName = browserInfo.name
+          console.info(`Browser name: ${browserName}`)
+          return browserName.includes('Firefox')
+        },
+        (reason) => {
+          console.warn('Failed getting browser info', reason)
+          return false
+        }
+      )
+).then((isFirefox) => {
+  console.info(`Is browser Firefox: ${isFirefox}`)
+  return isFirefox
+})
 
 class LRUCacheSet<T> {
   // Cache value does not matter, only key matter
@@ -36,7 +54,12 @@ const knownDomainsCache = new LRUCacheSet<string>(200)
 
 browser.webRequest.onBeforeRequest.addListener(
   handleRequest,
-  { urls: ['<all_urls>'], types: ['main_frame'] },
+  {
+    urls:
+      // Don't use <all_urls> because for Chrome that also includes the extension page
+      ['http://*/*', 'https://*/*', 'ftp://*/*'],
+    types: ['main_frame'],
+  },
   ['blocking']
 )
 
@@ -68,7 +91,7 @@ type MessageData =
   | { action: 'close-tab' }
 
 // Handle messages from blocking pages
-browser.runtime.onMessage.addListener((message: MessageData, sender) => {
+browser.runtime.onMessage.addListener(async (message: MessageData, sender) => {
   console.debug('Received message', message, sender)
 
   const tabId = sender.tab?.id
@@ -84,15 +107,21 @@ browser.runtime.onMessage.addListener((message: MessageData, sender) => {
     console.info(`Received message to open URL from domain ${domain}`)
     knownDomainsCache.add(domain)
 
-    browser.tabs
-      .update(tabId, {
-        // Replace the extension tab
-        loadReplace: true,
-        url: url,
-      })
-      .catch((reason) => {
-        console.error(`Failed opening URL ${url}`, reason)
-      })
+    let updateProperties: browser.tabs._UpdateUpdateProperties =
+      (await IS_FIREFOX)
+        ? {
+            // Replace the extension tab
+            loadReplace: true,
+            url: url,
+          }
+        : {
+            // Chrome does not support loadReplace, see https://github.com/mdn/browser-compat-data/issues/15412
+            url: url,
+          }
+
+    browser.tabs.update(tabId, updateProperties).catch((reason) => {
+      console.error(`Failed opening URL ${url}`, reason)
+    })
   } else {
     console.info('Received message to close tab')
     browser.tabs
@@ -135,7 +164,7 @@ function parseOrigin(url: string): string {
 }
 
 function matchesHistoryItem(
-  historyItem: HistoryItem,
+  historyItem: browser.history.HistoryItem,
   url: string,
   domain: string
 ): boolean {

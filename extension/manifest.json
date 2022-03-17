@@ -28,7 +28,10 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["background-scripts/background.js"],
+    "scripts": [
+      "web-ext-polyfill/browser-polyfill.js",
+      "background-scripts/background.js"
+    ],
     "persistent": true
   },
   "web_accessible_resources": ["pages/blocked-unknown.html", "icon.svg"]
