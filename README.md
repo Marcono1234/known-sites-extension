@@ -67,6 +67,10 @@ Other browsers might not support all features needed by this extension.
 
 It is recommended to use [Visual Studio Code](https://code.visualstudio.com/) for development.
 
+## Testing
+
+For manual testing instructions, see [Manual testing](Manual%20testing.md).
+
 ## Building
 
 ```bash
