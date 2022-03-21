@@ -43,15 +43,10 @@
   },
 
   "blocked_non_ascii_warning_text": {
-    "message": "Die Domain der Webseite benutzt Sonderzeichen (hier ersetzt mit $NON_ASCII$), diese werden manchmal verwendet um <b>Nutzer zu täuschen</b>. Klicke auf das $EYE_ICON$ Icon um die ursprüngliche Domain anzuzeigen, aber bitte beachte, dass manche Sonderzeichen komplett die Art und Weise ändern können, wie der Text dargestellt wird, z.B. durch Änderung der Textrichtung.",
-    "placeholders": {
-      "non_ascii": {
-        "content": "<span class=\"non-ascii-char\">?</span>"
-      },
-      "eye_icon": {
-        "content": "<img class=\"eye-icon-in-text\" alt=\"Icon ursprüngliche Domain umschalten\" />"
-      }
-    }
+    "message": "Die Domain der Webseite benutzt Sonderzeichen (hier ersetzt mit @NON-ASCII@), diese werden manchmal verwendet um **Nutzer zu täuschen**. Klicke auf das @EYE-ICON@ Icon um die ursprüngliche Domain anzuzeigen, aber bitte beachte, dass manche Sonderzeichen komplett die Art und Weise ändern können, wie der Text dargestellt wird, z.B. durch Änderung der Textrichtung."
+  },
+  "blocked_eye_icon_in_text_alt": {
+    "message": "Icon ursprüngliche Domain umschalten"
   },
 
   "blocked_button_open": {

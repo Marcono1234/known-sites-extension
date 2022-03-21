@@ -49,15 +49,11 @@
   },
 
   "blocked_non_ascii_warning_text": {
-    "message": "The domain of the website uses special characters (replaced here with $NON_ASCII$), this is sometimes used to <b>deceive users</b>. To view the original domain, click the $EYE_ICON$ icon, but note that certain characters might completely change the way the text is displayed, such as changing the text direction.",
-    "placeholders": {
-      "non_ascii": {
-        "content": "<span class=\"non-ascii-char\">?</span>"
-      },
-      "eye_icon": {
-        "content": "<img class=\"eye-icon-in-text\" alt=\"Toggle original domain icon\" />"
-      }
-    }
+    "message": "The domain of the website uses special characters (replaced here with @NON-ASCII@), this is sometimes used to **deceive users**. To view the original domain, click the @EYE-ICON@ icon, but note that certain characters might completely change the way the text is displayed, such as changing the text direction."
+  },
+  "blocked_eye_icon_in_text_alt": {
+    "message": "Toggle original domain icon",
+    "description": "img alt text of the eye icon in text."
   },
 
   "blocked_button_open": {

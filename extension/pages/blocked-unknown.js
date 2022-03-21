@@ -32,8 +32,16 @@ function setI18nContent() {
         }
     }
 
+    const eyeIconInTextAlt = browser.i18n.getMessage('blocked_eye_icon_in_text_alt')
+
     setI18nContent('', (element, message) => element.textContent = message)
-    setI18nContent('html', (element, message) => element.innerHTML = message)
+    setI18nContent('formatted', (element, message) => {
+        message = escapeHtml(message)
+            .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+            .replace(/@NON-ASCII@/g, '<span class=\"non-ascii-char\">?</span>')
+            .replace(/@EYE-ICON@/g, `<img class=\"eye-icon-in-text\" alt=\"${escapeHtml(eyeIconInTextAlt)}\" />`)
+        element.innerHTML = message
+    })
     setI18nContent('title', (element, message) => element.title = message)
     setI18nContent('img-alt', (element, message) => element.setAttribute('alt', message))
     setI18nContent('aria-label', (element, message) => element.setAttribute('aria-label', message))
