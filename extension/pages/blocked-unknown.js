@@ -149,6 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const openButton = document.getElementById('open-button')
     openButton.addEventListener('click', () => {
+        console.info(`Sending message to open URL with domain ${domainValue}`)
+
         // Send message to let extension first add domain to cache and then open
         // it (to avoid immediately blocking it again)
         browser.runtime.sendMessage(
@@ -159,7 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // all APIs of the browser treat domain consistently
                 'domain': rawDomainValue
             }
-        )
+        ).catch((reason) => {
+            console.error(`Failed sending message to open blocked URL ${urlValue}`, reason)
+        })
     })
 
     let revertButtonText
@@ -171,13 +175,17 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         revertButtonText = browser.i18n.getMessage('blocked_button_close_tab')
         revertButtonAction = () => {
+            console.info('Sending message to close blocked page tab')
+
             // window.close() only seems to work when tab was opened by script
             // Therefore let extension close the tab
             browser.runtime.sendMessage(
                 {
                     'action': 'close-tab'
                 }
-            )
+            ).catch((reason) => {
+                console.error('Failed sending message to close blocked page tab', reason)
+            })
         }
     }
 

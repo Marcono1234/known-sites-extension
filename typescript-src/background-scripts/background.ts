@@ -313,7 +313,7 @@ async function handleRequest(
         url: blockingPageUrl,
       })
       .catch((reason) => {
-        console.error(`Failed opening blocking page ${url}`, reason)
+        console.error(`Failed opening blocking page ${blockingPageUrl}`, reason)
       })
 
     return {
