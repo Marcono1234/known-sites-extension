@@ -4,7 +4,7 @@
   "description": "__MSG_manifest_extension_description__",
   "homepage_url": "https://github.com/Marcono1234/known-sites-extension",
   "default_locale": "en",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "browser_specific_settings": {
     "gecko": {
       "id": "known-sites@marcono1234.invalid"
