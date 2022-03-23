@@ -1,3 +1,7 @@
+:warning: This is a hobby project and might not provide good protection. Do not rely on it for professional phishing protection.
+
+---
+
 # <img src="extension/icon.svg" alt="Logo" width="30"> Known Sites
 
 Browser extension blocking websites the user has not opened before.
@@ -46,7 +50,7 @@ Other browsers might not support all features needed by this extension.
 
 ## Development
 
-1. In Visual Studio Code press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>, or alternative run in the terminal:
+1. In Visual Studio Code press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>, or alternatively run in the terminal:
 
    ```bash
    npm run watch
