@@ -39,7 +39,7 @@ time differentiates between subdomains when their content is user controlled.
 
 ## Supported Browsers
 
-- Chrome Desktop
+- Chrome Desktop (Incognito mode is not supported)
 - Firefox Desktop
 
 Other browsers might not support all features needed by this extension.

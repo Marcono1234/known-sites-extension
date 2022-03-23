@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlValue = params.get('url')
     const domainValue = params.get('domain')
     const rawDomainValue = params.get('rawDomain')
+    const isIncognito = params.get('isIncognito') === 'true'
 
     setI18nContent()
     // Sanitize domain to avoid having it interfere with title, e.g. due to right-to-left override
@@ -159,7 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 'url': urlValue,
                 // Use raw domain value to use what the browser originally provided; assuming that
                 // all APIs of the browser treat domain consistently
-                'domain': rawDomainValue
+                'domain': rawDomainValue,
+                'isIncognito': isIncognito
             }
         ).catch((reason) => {
             console.error(`Failed sending message to open blocked URL ${urlValue}`, reason)

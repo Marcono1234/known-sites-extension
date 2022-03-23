@@ -51,6 +51,38 @@ class LRUCacheSet<T> {
 }
 
 const knownDomainsCache = new LRUCacheSet<string>(200)
+/**
+ * Additional cache which is only used for incognito windows (because Firefox currently does not support
+ * `incognito: split`). For incognito windows both caches are used for lookup but only this cache is used
+ * for addition of domains. The cache is (if possible) cleared after all incognito windows are closed.
+ */
+const incognitoKnownDomainsCache = new LRUCacheSet<string>(200)
+
+browser.windows.onCreated.addListener(async (newWindow) => {
+  const hasOtherWindows = (
+    await browser.windows.getAll({ populate: false })
+  ).some((window) => window.id !== newWindow.id)
+
+  if (!hasOtherWindows) {
+    // Acts as fallback in case cache was not cleared properly after last incognito window from last session was closed
+    console.info(
+      'Detected first opened window; clearing previous incognito cache'
+    )
+    incognitoKnownDomainsCache.clear()
+  }
+})
+browser.windows.onRemoved.addListener(async (windowId) => {
+  const hasIncognitoWindow = (
+    await browser.windows.getAll({ populate: false })
+  ).some((window) => window.incognito && window.id !== windowId)
+
+  if (!hasIncognitoWindow) {
+    console.info(
+      'No incognito window is open anymore; clearing incognito cache'
+    )
+    incognitoKnownDomainsCache.clear()
+  }
+})
 
 browser.webRequest.onBeforeRequest.addListener(
   handleRequest,
@@ -87,7 +119,7 @@ browser.history.onVisitRemoved.addListener((removed) => {
 
 // Matches the data sent by the content script
 type MessageData =
-  | { action: 'open-url'; url: string; domain: string }
+  | { action: 'open-url'; url: string; domain: string; isIncognito: boolean }
   | { action: 'close-tab' }
 
 // Handle messages from blocking pages
@@ -100,12 +132,15 @@ browser.runtime.onMessage.addListener(async (message: MessageData, sender) => {
     return
   }
 
-  if (message.action === 'open-url') {
-    const url: string = message.url
-    const domain: string = message.domain
+  const action = message.action
+
+  if (action === 'open-url') {
+    const url = message.url
+    const domain = message.domain
+    const isIncognito = message.isIncognito
 
     console.info(`Received message to open URL from domain ${domain}`)
-    knownDomainsCache.add(domain)
+    ;(isIncognito ? incognitoKnownDomainsCache : knownDomainsCache).add(domain)
 
     let updateProperties: browser.tabs._UpdateUpdateProperties =
       (await IS_FIREFOX)
@@ -122,11 +157,13 @@ browser.runtime.onMessage.addListener(async (message: MessageData, sender) => {
     browser.tabs.update(tabId, updateProperties).catch((reason) => {
       console.error(`Failed opening URL ${url}`, reason)
     })
-  } else {
+  } else if (action === 'close-tab') {
     console.info('Received message to close tab')
     browser.tabs
       .remove(tabId)
       .catch((reason) => console.error('Failed closing tab', reason))
+  } else {
+    console.error(`Unknown message action: ${action}`, message)
   }
 })
 
@@ -160,7 +197,21 @@ function parseDomain(url: string): string {
 }
 
 function parseOrigin(url: string): string {
-  return new URL(url).origin
+  let origin
+  try {
+    origin = new URL(url).origin
+  } catch (typeError) {
+    console.error(`Failed parsing URL ${url}`, typeError)
+    // Fall back to using complete URL as origin
+    return url
+  }
+  // 'null' is used as "opaque origin", see https://html.spec.whatwg.org/multipage/origin.html#concept-origin-opaque
+  if (origin === '' || origin === 'null') {
+    console.error(`URL ${url} has no origin`)
+    // Fall back to using complete URL as origin
+    return url
+  }
+  return origin
 }
 
 function matchesHistoryItem(
@@ -199,9 +250,11 @@ async function hasQueryBookmarkUrlMatch(
   })
 }
 
-async function isBookmarkedSite(url: string, domain: string): Promise<boolean> {
-  const origin = parseOrigin(url)
-
+async function isBookmarkedSite(
+  url: string,
+  origin: string,
+  domain: string
+): Promise<boolean> {
   return (
     (await hasExactBookmarkUrlMatch(url)) ||
     (await hasExactBookmarkUrlMatch(origin)) ||
@@ -223,66 +276,83 @@ async function hasVisits(url: string): Promise<boolean> {
  * and the browser history.
  * If a match is found, `true` is returned and (if necessary) the known domains cache is adjusted.
  */
-async function isKnownSite(url: string, domain: string): Promise<boolean> {
+async function isKnownSite(
+  url: string,
+  domain: string,
+  isIncognito: boolean
+): Promise<boolean> {
   if (knownDomainsCache.contains(domain)) {
     console.info(`Found domain ${domain} in known domains cache`)
+    return true
+  }
+  if (isIncognito && incognitoKnownDomainsCache.contains(domain)) {
+    console.info(`Found domain ${domain} in incognito known domains cache`)
     return true
   }
 
   const origin = parseOrigin(url)
 
-  if ((await hasVisits(url)) || (await hasVisits(origin))) {
-    console.info(`Found visits in history for domain ${domain}`)
-    knownDomainsCache.add(domain)
-    return true
+  async function isKnownSiteFromBrowserData(): Promise<boolean> {
+    if ((await hasVisits(url)) || (await hasVisits(origin))) {
+      console.info(`Found visits in history for domain ${domain}`)
+      return true
+    }
+
+    // Did not find exact match in history; try history search
+    console.info(
+      `Did not find visit for domain ${domain}; trying history search`
+    )
+    let historyItems = await browser.history.search({
+      text: origin,
+      // Get matching items from any point in the past
+      startTime: 0,
+      maxResults: 100,
+    })
+
+    if (historyItems.some((item) => matchesHistoryItem(item, url, domain))) {
+      console.info(`Found match in history search results for domain ${domain}`)
+      return true
+    }
+
+    // Fall back to domain search
+    historyItems = await browser.history.search({
+      text: domain,
+      // Get matching items from any point in the past
+      startTime: 0,
+      maxResults: 100,
+    })
+
+    if (historyItems.some((item) => matchesHistoryItem(item, url, domain))) {
+      console.info(`Found match in history search results for domain ${domain}`)
+      return true
+    }
+
+    console.info(
+      `Did not find history entry for domain ${domain}; trying bookmark search`
+    )
+    if (await isBookmarkedSite(url, origin, domain)) {
+      console.info(`Found matching bookmark for domain ${domain}`)
+      return true
+    }
+
+    return false
   }
 
-  // Did not find exact match in history; try history search
-  console.info(`Did not find visit for domain ${domain}; trying history search`)
-  let historyItems = await browser.history.search({
-    text: origin,
-    // Get matching items from any point in the past
-    startTime: 0,
-    maxResults: 100,
-  })
-
-  if (historyItems.some((item) => matchesHistoryItem(item, url, domain))) {
-    console.info(`Found match in history search results for domain ${domain}`)
-    knownDomainsCache.add(domain)
+  if (await isKnownSiteFromBrowserData()) {
+    // Add domain to cache
+    ;(isIncognito ? incognitoKnownDomainsCache : knownDomainsCache).add(domain)
     return true
+  } else {
+    return false
   }
-
-  // Fall back to domain search
-  historyItems = await browser.history.search({
-    text: domain,
-    // Get matching items from any point in the past
-    startTime: 0,
-    maxResults: 100,
-  })
-
-  if (historyItems.some((item) => matchesHistoryItem(item, url, domain))) {
-    console.info(`Found match in history search results for domain ${domain}`)
-    knownDomainsCache.add(domain)
-    return true
-  }
-
-  console.info(
-    `Did not find history entry for domain ${domain}; trying bookmark search`
-  )
-  if (await isBookmarkedSite(url, domain)) {
-    console.info(`Found matching bookmark for domain ${domain}`)
-    knownDomainsCache.add(domain)
-    return true
-  }
-
-  return false
 }
 
 async function handleRequest(
   requestDetails: browser.webRequest._OnBeforeSendHeadersDetails
 ): Promise<browser.webRequest.BlockingResponse> {
   const url = requestDetails.url
-  console.debug(`Handling request for ${url}`)
+  const isIncognito = requestDetails.incognito === true
+  console.debug(`Handling ${isIncognito ? 'icognito ' : ''}request for ${url}`)
 
   // Firefox already seems to provide this in punycode
   const rawDomain = parseDomain(url)
@@ -296,14 +366,14 @@ async function handleRequest(
     return { cancel: true }
   }
 
-  if (await isKnownSite(url, rawDomain)) {
+  if (await isKnownSite(url, rawDomain, isIncognito)) {
     console.info(`Allowing access to known domain ${rawDomain}`)
     return {}
   } else {
     console.info(`Blocking unknown domain ${rawDomain}`)
     const blockingPageUrl = browser.runtime.getURL(
       // prettier-ignore
-      `pages/blocked-unknown.html?url=${encodeURIComponent(url)}&domain=${encodeURIComponent(nonPunycodeDomain)}&rawDomain=${rawDomain}`
+      `pages/blocked-unknown.html?url=${encodeURIComponent(url)}&domain=${encodeURIComponent(nonPunycodeDomain)}&rawDomain=${rawDomain}&isIncognito=${isIncognito}`
     )
 
     // Cannot return blocking page URL in `redirectUrl` because Firefox already records original URL in history
