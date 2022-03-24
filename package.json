@@ -1,4 +1,5 @@
 {
+  "name": "known-sites-extension",
   "private": true,
   "scripts": {
     "watch": "cd typescript-src && npm run watch",

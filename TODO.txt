@@ -1,5 +1,7 @@
 - Sign add-on
     https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/
 
+- ? Maybe convert blocked page script to TypeScript; can then share common code for message format and blocked page URL encoding
+
 - ? Maybe use `incognito: split` once supported by Firefox
     https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/incognito
