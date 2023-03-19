@@ -1,19 +1,14 @@
 {
-    "compilerOptions": {
-        "outDir": "out",
-        "rootDir": ".",
-        "typeRoots": [
-            "node_modules/@types"
-        ],
-        "sourceMap": true,
-        "strict": true,
-        "module": "es6",
-        "target": "es6",
-    },
-    "include": [
-        "background-scripts"
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+  "compilerOptions": {
+    "outDir": "out",
+    "rootDir": ".",
+    "typeRoots": ["node_modules/@types"],
+    "sourceMap": true,
+    "strict": true,
+    "module": "CommonJS",
+    "target": "es6",
+    "moduleResolution": "node"
+  },
+  "include": ["background-scripts"],
+  "exclude": ["node_modules"]
 }

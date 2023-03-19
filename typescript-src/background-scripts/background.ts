@@ -1,5 +1,5 @@
 import * as psl from 'psl'
-import * as LRUCache from 'lru-cache'
+import LRUCache from 'lru-cache'
 // Use trailing slash to avoid import Node module
 import * as punycode from 'punycode/'
 
@@ -22,8 +22,8 @@ const IS_FIREFOX: Promise<boolean> = (
   return isFirefox
 })
 
-class LRUCacheSet<T> {
-  // Cache value does not matter, only key matter
+class LRUCacheSet<T extends {}> {
+  // Cache value does not matter, only key matters
   private readonly cache: LRUCache<T, any>
 
   constructor(maxSize: number) {
