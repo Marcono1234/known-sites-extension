@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "watch": "cd typescript-src && npm run watch",
-    "debug-firefox": "web-ext run --source-dir extension --target firefox-desktop",
+    "debug-firefox": "web-ext run --devtools --source-dir extension --target firefox-desktop",
     "debug-chromium": "web-ext run --source-dir extension --target chromium",
     "lint": "web-ext lint --source-dir extension",
     "package": "npm clean-install && cd typescript-src && npm clean-install && npm run build && cd .. && web-ext build --overwrite-dest --source-dir extension"
