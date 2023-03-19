@@ -338,7 +338,12 @@ async function isKnownSite(
     return false
   }
 
-  if (await isKnownSiteFromBrowserData()) {
+  const timeStart = performance.now()
+  const isKnown = await isKnownSiteFromBrowserData()
+  const millisNeeded = performance.now() - timeStart
+  console.debug(`Lookup from browser data took ${millisNeeded}ms`)
+
+  if (isKnown) {
     // Add domain to cache
     ;(isIncognito ? incognitoKnownDomainsCache : knownDomainsCache).add(domain)
     return true
