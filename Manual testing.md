@@ -185,3 +185,22 @@ The following symbols are used for the tests:
 3. Open another unknown site under the `.github.io` domain, for example `https://google.github.io`  
    :mag: The site should be blocked  
    :mag: The extension page should show the complete `google.github.io` domain
+
+### IPv4 address
+
+1. Try to open `http://127.0.0.0`  
+   :mag: The site should be blocked  
+   :mag: The extension page should show `127.0.0.0` as hostname
+2. Click the "Open" button on the extension page  
+   :information_source: The site most likely fails to load; this can be ignored
+3. Try to open `http://127.1.0.0`  
+   :mag: The site should be blocked
+
+### IPv6 address
+
+1. Try to open `http://[::1]`  
+   :mag: The site should be blocked  
+   :mag: The extension page should show `[::1]` as hostname
+2. Try to open `http://[2001:4860:4860::8888]` (address of [Google DNS](https://developers.google.com/speed/public-dns/docs/using#addresses))  
+   :mag: The site should be blocked  
+   :mag: The extension page should show `[2001:4860:4860::8888]` as hostname
