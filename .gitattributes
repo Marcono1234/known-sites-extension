@@ -1,0 +1,8 @@
+# Normalize line endings of text files
+* text=auto
+
+# Force usage of LF for JavaScript and TypeScript files
+# This is mainly a workaround to get consistent newlines in source maps, see also
+# https://github.com/webpack/webpack/discussions/16847
+*.js text eol=lf
+*.ts text eol=lf
