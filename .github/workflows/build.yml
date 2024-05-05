@@ -1,5 +1,11 @@
 name: Build extension
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      # Ignore Dependabot branches because it will also open a pull request, which would cause the
+      # workflow to redundantly run twice
+      - dependabot/**
+  pull_request:
 
 jobs:
   build:
