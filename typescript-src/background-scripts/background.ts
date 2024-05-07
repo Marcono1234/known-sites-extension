@@ -15,7 +15,7 @@ const IS_FIREFOX: Promise<boolean> = (
         (reason) => {
           console.warn('Failed getting browser info', reason)
           return false
-        }
+        },
       )
 ).then((isFirefox) => {
   console.info(`Is browser Firefox: ${isFirefox}`)
@@ -66,7 +66,7 @@ browser.windows.onCreated.addListener(async (newWindow) => {
   if (!hasOtherWindows) {
     // Acts as fallback in case cache was not cleared properly after last incognito window from last session was closed
     console.info(
-      'Detected first opened window; clearing previous incognito cache'
+      'Detected first opened window; clearing previous incognito cache',
     )
     incognitoKnownDomainsCache.clear()
   }
@@ -78,7 +78,7 @@ browser.windows.onRemoved.addListener(async (windowId) => {
 
   if (!hasIncognitoWindow) {
     console.info(
-      'No incognito window is open anymore; clearing incognito cache'
+      'No incognito window is open anymore; clearing incognito cache',
     )
     incognitoKnownDomainsCache.clear()
   }
@@ -92,7 +92,7 @@ browser.webRequest.onBeforeRequest.addListener(
       ['http://*/*', 'https://*/*', 'ftp://*/*'],
     types: ['main_frame'],
   },
-  ['blocking']
+  ['blocking'],
 )
 
 // Update cache when items were removed from browser history
@@ -109,7 +109,7 @@ browser.history.onVisitRemoved.addListener((removed) => {
       if (!removedDomains.has(domain)) {
         removedDomains.add(domain)
         console.info(
-          `Removing domain ${domain} from cache after history removal`
+          `Removing domain ${domain} from cache after history removal`,
         )
         knownDomainsCache.remove(domain)
       }
@@ -226,7 +226,7 @@ function parseOrigin(url: string): string {
 function matchesHistoryItem(
   historyItem: browser.history.HistoryItem,
   url: string,
-  domain: string
+  domain: string,
 ): boolean {
   const historyUrl = historyItem.url
 
@@ -248,7 +248,7 @@ async function hasExactBookmarkUrlMatch(url: string): Promise<boolean> {
 
 async function hasQueryBookmarkUrlMatch(
   queryString: string,
-  domain: string
+  domain: string,
 ): Promise<boolean> {
   const bookmarks = browser.bookmarks.search({
     query: queryString,
@@ -262,7 +262,7 @@ async function hasQueryBookmarkUrlMatch(
 async function isBookmarkedSite(
   url: string,
   origin: string,
-  domain: string
+  domain: string,
 ): Promise<boolean> {
   return (
     (await hasExactBookmarkUrlMatch(url)) ||
@@ -288,7 +288,7 @@ async function hasVisits(url: string): Promise<boolean> {
 async function isKnownSite(
   url: string,
   domain: string,
-  isIncognito: boolean
+  isIncognito: boolean,
 ): Promise<boolean> {
   if (knownDomainsCache.contains(domain)) {
     console.info(`Found domain ${domain} in known domains cache`)
@@ -309,7 +309,7 @@ async function isKnownSite(
 
     // Did not find exact match in history; try history search
     console.info(
-      `Did not find visit for domain ${domain}; trying history search`
+      `Did not find visit for domain ${domain}; trying history search`,
     )
     let historyItems = await browser.history.search({
       text: origin,
@@ -337,7 +337,7 @@ async function isKnownSite(
     }
 
     console.info(
-      `Did not find history entry for domain ${domain}; trying bookmark search`
+      `Did not find history entry for domain ${domain}; trying bookmark search`,
     )
     if (await isBookmarkedSite(url, origin, domain)) {
       console.info(`Found matching bookmark for domain ${domain}`)
@@ -362,7 +362,7 @@ async function isKnownSite(
 }
 
 async function handleRequest(
-  requestDetails: browser.webRequest._OnBeforeSendHeadersDetails
+  requestDetails: browser.webRequest._OnBeforeSendHeadersDetails,
 ): Promise<browser.webRequest.BlockingResponse> {
   const url = requestDetails.url
   const isIncognito = requestDetails.incognito === true
@@ -387,7 +387,7 @@ async function handleRequest(
     console.info(`Blocking unknown domain ${rawDomain}`)
     const blockingPageUrl = browser.runtime.getURL(
       // prettier-ignore
-      `pages/blocked-unknown.html?url=${encodeURIComponent(url)}&domain=${encodeURIComponent(nonPunycodeDomain)}&rawDomain=${rawDomain}&isIncognito=${isIncognito}`
+      `pages/blocked-unknown.html?url=${encodeURIComponent(url)}&domain=${encodeURIComponent(nonPunycodeDomain)}&rawDomain=${rawDomain}&isIncognito=${isIncognito}`,
     )
 
     // Cannot return blocking page URL in `redirectUrl` because Firefox already records original URL in history
