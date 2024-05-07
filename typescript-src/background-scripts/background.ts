@@ -1,5 +1,5 @@
 import * as psl from 'psl'
-import LRUCache from 'lru-cache'
+import { LRUCache } from 'lru-cache'
 // Use trailing slash to avoid import Node module
 import * as punycode from 'punycode/'
 
