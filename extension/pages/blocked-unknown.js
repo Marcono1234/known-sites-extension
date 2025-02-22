@@ -43,7 +43,7 @@ function setI18nContent() {
       .replace(/@NON-ASCII@/g, '<span class="non-ascii-char">?</span>')
       .replace(
         /@EYE-ICON@/g,
-        `<img class=\"eye-icon-in-text\" alt=\"${escapeHtml(eyeIconInTextAlt)}\" />`,
+        `<img class="eye-icon-in-text" alt="${escapeHtml(eyeIconInTextAlt)}" />`,
       )
     element.innerHTML = message
   })

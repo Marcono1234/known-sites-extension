@@ -142,7 +142,7 @@ browser.runtime.onMessage.addListener(async (message: MessageData, sender) => {
     console.info(`Received message to open URL from domain ${domain}`)
     ;(isIncognito ? incognitoKnownDomainsCache : knownDomainsCache).add(domain)
 
-    let updateProperties: browser.tabs._UpdateUpdateProperties =
+    const updateProperties: browser.tabs._UpdateUpdateProperties =
       (await IS_FIREFOX)
         ? {
             // Replace the extension tab
