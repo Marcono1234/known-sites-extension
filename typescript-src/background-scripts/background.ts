@@ -185,7 +185,7 @@ function parseDomain(url: string): string {
   // psl.get(string) does not properly handle IP addresses, see https://github.com/lupomontero/psl/issues/29
   // therefore check for them here
   // Match anything which looks like an IPv4 or IPv6 address
-  const ipAddressRegex = /\d\.\d\.\d\.\d|\[[\d:]+\]/
+  const ipAddressRegex = /^(\d+\.\d+\.\d+\.\d+|\[[\d:]+\])$/
   if (ipAddressRegex.test(hostname)) {
     console.info(`Detected hostname ${hostname} to be an IP address`)
     return hostname
