@@ -16,7 +16,7 @@ Private Browsing), and might not be installed on all devices of the user.
 Every time the user opens a new website, the extension checks if the user has opened the website before (i.e. if it is a 'known site' to
 the user). If this is not the case, loading of the website is blocked and a warning page is shown. On that page the user is informed that
 they have not opened the website before. They then have the choice to open the website, or to go to previous website / close the tab.
-When the user choses to open the website, this choice is temporarly stored, and additionally because the browser adds it to the history,
+When the user choses to open the website, this choice is temporarily stored, and additionally because the browser adds it to the history,
 it will be considered 'known' next time; see the sections below.
 
 An icon in the browser toolbar indicates that the extension is active; it can be removed if desired ([Firefox documentation](https://support.mozilla.org/en-US/kb/customize-firefox-controls-buttons-and-toolbars)).

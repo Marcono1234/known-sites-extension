@@ -16,7 +16,7 @@ as expected, and to make sure that no errors occur:
 The following symbols are used for the tests:
 
 - :mag: Describes the expected outcome
-- :information_source: An important note about the test, for example a browser incompability
+- :information_source: An important note about the test, for example a browser incompatibility
 
 ## Tests
 
@@ -39,7 +39,7 @@ The following symbols are used for the tests:
    :mag: The site should not appear in the history yet
 3. Click the "Open" button of the extension page  
    :mag: The site should be opened
-4. Check the browser history navigations buttons (forward, backward)  
+4. Check the browser history navigation buttons (forward, backward)  
    :mag: The extension page should not be listed  
    :information_source: Does not work for Chrome
 5. Check the browser history again  
@@ -71,7 +71,7 @@ The following symbols are used for the tests:
    :mag: A "Go back" button should be shown on the extension page
 2. Click the "Go back" button of the extension page  
    :mag: The tab should show the previously opened site
-3. Check the browser history navigations buttons (forward, backward)  
+3. Check the browser history navigation buttons (forward, backward)  
    :mag: The extension page should be listed for the "forward" navigation
 
 ### Blocked "Close tab"

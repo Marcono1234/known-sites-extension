@@ -366,7 +366,7 @@ async function handleRequest(
 ): Promise<browser.webRequest.BlockingResponse> {
   const url = requestDetails.url
   const isIncognito = requestDetails.incognito === true
-  console.debug(`Handling ${isIncognito ? 'icognito ' : ''}request for ${url}`)
+  console.debug(`Handling ${isIncognito ? 'incognito ' : ''}request for ${url}`)
 
   // Firefox already seems to provide this in punycode
   const rawDomain = parseDomain(url)
