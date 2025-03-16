@@ -1,8 +1,9 @@
 /node_modules
-/typescript-src/node_modules
 
 # Output directories of compiled TypeScript files
 /extension/background-scripts
+/extension/pages/*.js
+/extension/pages/*.js.map
 
 # Polyfill for Chrome support; automatically copied during build
 /extension/web-ext-polyfill/browser-polyfill.js

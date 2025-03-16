@@ -1,19 +1,13 @@
-'use strict;'
+import { fromPageUrlParams, MessageData } from '../../common-src/common'
 
 // Based on https://github.com/EFForg/https-everywhere/blob/579b8c59d078fd65d547a546b381c9ae45c61232/chromium/pages/translation.js
 function setI18nContent() {
-  // Set translated text based on data attributes
-  /**
-   * @callback i18nCallback
-   * @param {HTMLElement} element
-   * @param {string} translatedMessage
-   */
-  /**
-   * @param {string} dataSuffix
-   * @param {i18nCallback} callback
-   */
-  function setI18nContent(dataSuffix, callback) {
-    const attrName = 'data-i18n' + (dataSuffix === '' ? '' : ('-' + dataSuffix))
+  /** Set translated text based on data attributes */
+  function setI18nContent(
+    dataSuffix: string,
+    callback: (element: Element, message: string) => void,
+  ) {
+    const attrName = 'data-i18n' + (dataSuffix === '' ? '' : '-' + dataSuffix)
 
     for (const element of document.querySelectorAll(`[${attrName}]`)) {
       const attrValue = element.getAttribute(attrName)
@@ -26,7 +20,6 @@ function setI18nContent() {
       if (message === '') {
         console.error(`Missing translation for ${attrValue}`)
       } else {
-        // @ts-ignore
         callback(element, message)
       }
     }
@@ -47,7 +40,9 @@ function setI18nContent() {
       )
     element.innerHTML = message
   })
-  setI18nContent('title', (element, message) => (element.title = message))
+  setI18nContent('title', (element, message) =>
+    element.setAttribute('title', message),
+  )
   setI18nContent('img-alt', (element, message) =>
     element.setAttribute('alt', message),
   )
@@ -57,11 +52,7 @@ function setI18nContent() {
 }
 
 // From https://stackoverflow.com/a/6234804
-/**
- * @param {string} input
- * @returns {string}
- */
-function escapeHtml(input) {
+function escapeHtml(input: string): string {
   return input
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -70,19 +61,11 @@ function escapeHtml(input) {
     .replace(/'/g, '&#039;')
 }
 
-/**
- * @param {number} codepoint
- * @returns {boolean}
- */
-function isAscii(codepoint) {
-  return codepoint >= 32 && codepoint <= 126
+function isAscii(codepoint: number | undefined): boolean {
+  return codepoint !== undefined && codepoint >= 32 && codepoint <= 126
 }
 
-/**
- * @param {string} domain
- * @returns {string}
- */
-function createSanitizedDomainForTitle(domain) {
+function createSanitizedDomainForTitle(domain: string): string {
   // Note: Could probably also implement this with regex checking for negated range
   let sanitized = ''
   for (const c of domain) {
@@ -96,16 +79,13 @@ function createSanitizedDomainForTitle(domain) {
   return sanitized
 }
 
-/**
- * @typedef HighlightResult
- * @type {object}
- * @property {string} sanitizedDomainHtml
- * @property {string} originalDomainHtml
- *
- * @param {string} domain
- * @returns {?HighlightResult}
- */
-function createHighlightedDomain(domain) {
+type HighlightResult = {
+  sanitizedDomainHtml: string
+  originalDomainHtml: string
+}
+
+/** Creates highlighting data for non-ASCII domains, or `null` if the domain is ASCII-only */
+function createHighlightedDomain(domain: string): HighlightResult | null {
   let sanitizedResultHtml = ''
   let originalResultHtml = ''
   let hasNonAscii = false
@@ -149,37 +129,37 @@ function createHighlightedDomain(domain) {
 
 // Based on https://github.com/EFForg/https-everywhere/blob/579b8c59d078fd65d547a546b381c9ae45c61232/chromium/pages/cancel/ux.js
 document.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search)
-  const urlValue = params.get('url')
-  const domainValue = params.get('domain')
-  const rawDomainValue = params.get('rawDomain')
-  const isIncognito = params.get('isIncognito') === 'true'
+  const blockedPage = fromPageUrlParams(
+    new URLSearchParams(window.location.search),
+  )
+  const blockedUrl = blockedPage.url
+  const blockedDomain = blockedPage.domain
 
   setI18nContent()
   // Sanitize domain to avoid having it interfere with title, e.g. due to right-to-left override
   document.title = browser.i18n.getMessage(
     'blocked_window_title',
-    createSanitizedDomainForTitle(domainValue),
+    createSanitizedDomainForTitle(blockedDomain),
   )
 
-  const openButton = document.getElementById('open-button')
+  const openButton = document.getElementById('open-button')!
   openButton.addEventListener('click', () => {
-    console.info(`Sending message to open URL with domain ${domainValue}`)
+    console.info(`Sending message to open URL with domain ${blockedDomain}`)
 
     // Send message to let extension first add domain to cache and then open
     // it (to avoid immediately blocking it again)
     browser.runtime
       .sendMessage({
         action: 'open-url',
-        url: urlValue,
+        url: blockedUrl,
         // Use raw domain value to use what the browser originally provided; assuming that
         // all APIs of the browser treat domain consistently
-        domain: rawDomainValue,
-        isIncognito: isIncognito,
-      })
+        domain: blockedPage.rawDomain,
+        isIncognito: blockedPage.isIncognito,
+      } as MessageData)
       .catch((reason) => {
         console.error(
-          `Failed sending message to open blocked URL ${urlValue}`,
+          `Failed sending message to open blocked URL ${blockedUrl}`,
           reason,
         )
       })
@@ -201,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
       browser.runtime
         .sendMessage({
           action: 'close-tab',
-        })
+        } as MessageData)
         .catch((reason) => {
           console.error(
             'Failed sending message to close blocked page tab',
@@ -211,15 +191,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const revertButton = document.getElementById('revert-button')
+  const revertButton = document.getElementById('revert-button')!
   revertButton.textContent = revertButtonText
   revertButton.addEventListener('click', revertButtonAction)
 
-  const domainPlaceholder = document.getElementById('domain-placeholder')
-  const highlightedDomainHtmls = createHighlightedDomain(domainValue)
+  const domainPlaceholder = document.getElementById('domain-placeholder')!
+  const highlightedDomainHtmls = createHighlightedDomain(blockedDomain)
 
   if (highlightedDomainHtmls === null) {
-    domainPlaceholder.textContent = domainValue
+    domainPlaceholder.textContent = blockedDomain
   } else {
     // Initially show encoded representation
     domainPlaceholder.innerHTML = highlightedDomainHtmls.sanitizedDomainHtml
@@ -230,10 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const toggleCheckbox = document.getElementById(
       'original-domain-toggle-checkbox',
-    )
+    )!
     toggleCheckbox.addEventListener('change', (event) => {
-      // @ts-ignore
-      const isChecked = event.target.checked === true
+      const isChecked = (event.target as HTMLInputElement).checked === true
       const newHtml = isChecked
         ? highlightedDomainHtmls.originalDomainHtml
         : highlightedDomainHtmls.sanitizedDomainHtml

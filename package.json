@@ -2,13 +2,14 @@
   "name": "known-sites-extension",
   "private": true,
   "scripts": {
-    "watch": "cd typescript-src && npm run watch",
     "debug-firefox": "web-ext run --devtools --source-dir extension --target firefox-desktop",
     "debug-chromium": "web-ext run --source-dir extension --target chromium",
     "lint": "web-ext lint --source-dir extension",
-    "package": "npm clean-install && cd typescript-src && npm clean-install && npm run build && cd .. && web-ext build --overwrite-dest --source-dir extension"
+    "copy-polyfill": "node -e \"const fs = require('fs'); fs.mkdirSync('./extension/web-ext-polyfill', { recursive: true }); fs.copyFileSync('./node_modules/webextension-polyfill/dist/browser-polyfill.js', './extension/web-ext-polyfill/browser-polyfill.js');\"",
+    "package": "npm clean-install && npm run copy-polyfill && npm --prefix ./typescript-src run package && web-ext build --overwrite-dest --source-dir extension"
   },
   "devDependencies": {
+    "webextension-polyfill": "^0.12.0",
     "web-ext": "^8.4.0",
     "eslint": "^9.21.0",
     "prettier": "^3.5.2"

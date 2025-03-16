@@ -2,6 +2,7 @@ import * as psl from 'psl'
 import { LRUCache } from 'lru-cache'
 // Use trailing slash to avoid import Node module
 import * as punycode from 'punycode/'
+import { MessageData, toPageUrlParamsString } from '../../common-src/common'
 
 const IS_FIREFOX: Promise<boolean> = (
   browser.runtime.getBrowserInfo === undefined
@@ -116,11 +117,6 @@ browser.history.onVisitRemoved.addListener((removed) => {
     })
   }
 })
-
-// Matches the data sent by the content script
-type MessageData =
-  | { action: 'open-url'; url: string; domain: string; isIncognito: boolean }
-  | { action: 'close-tab' }
 
 // Handle messages from blocking pages
 browser.runtime.onMessage.addListener(async (message: MessageData, sender) => {
@@ -385,9 +381,14 @@ async function handleRequest(
     return {}
   } else {
     console.info(`Blocking unknown domain ${rawDomain}`)
+    const urlParams = toPageUrlParamsString({
+      url: url,
+      domain: nonPunycodeDomain,
+      rawDomain: rawDomain,
+      isIncognito: isIncognito,
+    })
     const blockingPageUrl = browser.runtime.getURL(
-      // prettier-ignore
-      `pages/blocked-unknown.html?url=${encodeURIComponent(url)}&domain=${encodeURIComponent(nonPunycodeDomain)}&rawDomain=${rawDomain}&isIncognito=${isIncognito}`,
+      `pages/blocked-unknown.html?${urlParams}`,
     )
 
     // Cannot return blocking page URL in `redirectUrl` because Firefox already records original URL in history

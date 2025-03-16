@@ -50,15 +50,16 @@ Other browsers might not support all features needed by this extension.
 
 ## Development
 
-1. In Visual Studio Code press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>, or alternatively run in the terminal:
+1. Copy the polyfill file
 
    ```bash
-   npm run watch
+   npm run copy-polyfill
    ```
 
-   This will start watching changes in the TypeScript sources, compiles and bundles them.
+2. In Visual Studio Code press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> (command "Tasks: Run Build Task").\
+   Or alternatively in separate terminal windows run the `watch` scripts defined for the sub-projects under the [`typescript-src` directory](./typescript-src).
 
-2. In a separate terminal, run:
+3. In a separate terminal, run:
 
    ```bash
    npm run debug-firefox
@@ -66,7 +67,7 @@ Other browsers might not support all features needed by this extension.
 
    This will launch a development browser Firefox browser and automatically apply changes made to the extension resources.
 
-3. In the development Firefox browser, open `about:debugging`. See the [Extension Workshop documentation](https://extensionworkshop.com/documentation/develop/debugging/)
+4. In the development Firefox browser, open `about:debugging`. See the [Extension Workshop documentation](https://extensionworkshop.com/documentation/develop/debugging/)
    for more information.
 
 It is recommended to use [Visual Studio Code](https://code.visualstudio.com/) for development.
