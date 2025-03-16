@@ -1,4 +1,7 @@
 {
+  "manifest_extension_name": {
+    "message": "Known Sites"
+  },
   "manifest_extension_description": {
     "message": "Blocks websites which the user had not opened before."
   },

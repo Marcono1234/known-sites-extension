@@ -1,4 +1,7 @@
 {
+  "manifest_extension_name": {
+    "message": "Known Sites"
+  },
   "manifest_extension_description": {
     "message": "Blockiert Webseiten, die der Nutzer / die Nutzerin vorher noch nie geöffnet hatte."
   },
