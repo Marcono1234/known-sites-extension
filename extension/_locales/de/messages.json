@@ -12,6 +12,15 @@
     }
   },
 
+  "browser_incognito_unsupported": {
+    "message": "Inkognito / Privat Modus wird von der \"$NAME$\" Erweiterung nicht für diesen Browser unterstützt. Bitte deaktiviere die Erweiterung im Inkognito Modus in den Einstellungen der Erweiterung.",
+    "placeholders": {
+      "name": {
+        "content": "Known Sites"
+      }
+    }
+  },
+
   "blocked_window_title": {
     "message": "Blockiert – $DOMAIN$",
     "placeholders": {

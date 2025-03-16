@@ -60,6 +60,14 @@ const knownDomainsCache = new LRUCacheSet<string>(200)
 const incognitoKnownDomainsCache = new LRUCacheSet<string>(200)
 
 browser.windows.onCreated.addListener(async (newWindow) => {
+  if (newWindow.incognito && !(await IS_FIREFOX)) {
+    // Note: This alert dialog is only shown when the user enabled the extension for incognito mode, otherwise
+    // the listener is not notified about the newly created incognito window (as desired)
+    // Note: `alert` might not work for all browsers, e.g. Firefox shows "alert() is not supported in background windows",
+    // but at least in Chrome (where this message is shown) `alert` works
+    alert(browser.i18n.getMessage('browser_incognito_unsupported'))
+  }
+
   const hasOtherWindows = (
     await browser.windows.getAll({ populate: false })
   ).some((window) => window.id !== newWindow.id)
@@ -361,6 +369,8 @@ async function handleRequest(
   requestDetails: browser.webRequest._OnBeforeSendHeadersDetails,
 ): Promise<browser.webRequest.BlockingResponse> {
   const url = requestDetails.url
+  // Note: `incognito` is only supported by Firefox currently, but not other browsers, see
+  // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/onBeforeRequest#browser_compatibility
   const isIncognito = requestDetails.incognito === true
   console.debug(`Handling ${isIncognito ? 'incognito ' : ''}request for ${url}`)
 

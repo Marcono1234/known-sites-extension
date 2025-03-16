@@ -13,6 +13,15 @@
     }
   },
 
+  "browser_incognito_unsupported": {
+    "message": "Incognito / Private mode is not supported by the \"$NAME$\" extension for this browser. Please disable the extension for incognito mode in the extension settings.",
+    "placeholders": {
+      "name": {
+        "content": "Known Sites"
+      }
+    }
+  },
+
   "blocked_window_title": {
     "message": "Blocked – $DOMAIN$",
     "placeholders": {

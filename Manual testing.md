@@ -204,3 +204,27 @@ The following symbols are used for the tests:
 2. Try to open `http://[2001:4860:4860::8888]` (address of [Google DNS](https://developers.google.com/speed/public-dns/docs/using#addresses))  
    :mag: The site should be blocked  
    :mag: The extension page should show `[2001:4860:4860::8888]` as hostname
+
+### Incognito / Private mode (Chrome)
+
+1. Open the extension settings and allow usage in Incognito windows
+2. Open a new Incognito window  
+   :mag: A dialog should appear, telling the user that Incognito mode is not supported for this browser
+
+### Incognito / Private mode (Firefox)
+
+1. Open the extension settings and allow usage in Private windows
+2. In a non-private window open `example.com` (clicking the "Open" button of the extension, if necessary)
+3. In a private window open `example.com`  
+   :mag: The site should not be blocked
+4. In the same private window open another site, for example `github.com`  
+   :mag: The site should be blocked
+5. Click the "Open" button of the extension page  
+   :mag: The site should be opened
+6. In another tab of the same private window, open `github.com` again  
+   :mag: It should not be blocked
+7. In a non-private window, open `github.com`  
+   :mag: The site should be blocked (despite having been opened in the private window)
+8. Close all private windows
+9. In a new private window, open `github.com` again  
+   :mag: The site should be blocked again

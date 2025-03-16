@@ -43,7 +43,8 @@ time differentiates between subdomains when their content is user controlled.
 
 ## Supported Browsers
 
-- Chrome Desktop (Incognito mode is not supported)
+- Chrome Desktop (Incognito mode is not supported, because the
+  [extension page cannot be shown](https://developer.chrome.com/docs/extensions/reference/manifest/incognito#spanning))
 - Firefox Desktop
 
 Other browsers might not support all features needed by this extension.
