@@ -10,7 +10,8 @@
 4. Manually run the ["Build extension" GitHub workflow](https://github.com/Marcono1234/known-sites-extension/actions/workflows/build.yml)\
    **Important:** Make sure to select the correct Git branch.
 5. Download the extension from the workflow run
-6. Verify that it is identical to the one you built locally (to make sure the build is reproducible)
+6. Verify that it is identical to the one you built locally (to make sure the build is reproducible)\
+   **Note:** There might be differences in line endings when building on Windows locally, and [ZIP metadata might differ](https://github.com/mozilla/web-ext/issues/2381).
 7. Submit the new extension version at the [Mozilla Add-on Developer Hub](https://addons.mozilla.org/en-US/developers/addons)
 
 ## After submission approval
