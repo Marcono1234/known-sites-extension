@@ -1,4 +1,5 @@
-:warning: This is a hobby project and might not provide good protection. Do not rely on it for professional phishing protection.
+> [!WARNING]\
+> This is a hobby project and might not provide good protection. Do not rely on it for professional phishing protection.
 
 ---
 

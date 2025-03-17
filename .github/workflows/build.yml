@@ -6,6 +6,8 @@ on:
       # workflow to redundantly run twice
       - dependabot/**
   pull_request:
+  # Support manually running workflow, in which case the web-extension artifact is uploaded (see below)
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,3 +24,12 @@ jobs:
       # Lint after building package to first compile all files
       - name: Lint
         run: npm run lint
+
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        # Only upload artifact if workflow was manually triggered
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          name: web-extension
+          path: ./web-ext-artifacts/known_sites*.zip
+          if-no-files-found: error
