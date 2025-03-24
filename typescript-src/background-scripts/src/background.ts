@@ -23,8 +23,11 @@ const IS_FIREFOX: Promise<boolean> = (
   return isFirefox
 })
 
+// Disable lint: LRUCache has `{}` as bound
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 class LRUCacheSet<T extends {}> {
   // Cache value does not matter, only key matters
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private readonly cache: LRUCache<T, any>
 
   constructor(maxSize: number) {
