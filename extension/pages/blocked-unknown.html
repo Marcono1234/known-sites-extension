@@ -1,43 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <script src="../web-ext-polyfill/browser-polyfill.js"></script>
     <script src="blocked-unknown.js"></script>
-    <link href="style.css" rel="stylesheet">
-    <link rel="icon" href="/icon.svg" sizes="any" type="image/svg+xml">
-</head>
+    <link href="style.css" rel="stylesheet" />
+    <link rel="icon" href="/icon.svg" sizes="any" type="image/svg+xml" />
+  </head>
 
-<body>
+  <body>
     <main>
-        <header>
-            <h1>
-                <img src="/icon.svg" class="logo" data-i18n-img-alt="blocked_header_logo_alt">
-                <span data-i18n="blocked_header"></span>
-            </h1>
-        </header>
+      <header>
+        <h1>
+          <img
+            src="/icon.svg"
+            class="logo"
+            data-i18n-img-alt="blocked_header_logo_alt"
+          />
+          <span data-i18n="blocked_header"></span>
+        </h1>
+      </header>
 
-        <p class="warning-text" data-i18n="blocked_warning_text"></p>
+      <p class="warning-text" data-i18n="blocked_warning_text"></p>
 
-        <p class="open-question" data-i18n="blocked_warning_open_question"></p>
-        <div class="domain-container">
-            <div id="domain-placeholder"></div>
-            <div class="non-ascii-domain hidden">
-                <input type="checkbox" id="original-domain-toggle-checkbox"
-                    data-i18n-aria-label="blocked_toggle_original_domain_label">
-                <!-- Replace checkbox icon, see https://stackoverflow.com/a/59573635 -->
-                <label for="original-domain-toggle-checkbox"
-                    data-i18n-title="blocked_toggle_original_domain_title"></label>
-            </div>
+      <p class="open-question" data-i18n="blocked_warning_open_question"></p>
+      <div class="domain-container">
+        <div id="domain-placeholder"></div>
+        <div class="non-ascii-domain hidden">
+          <input
+            type="checkbox"
+            id="original-domain-toggle-checkbox"
+            data-i18n-aria-label="blocked_toggle_original_domain_label"
+          />
+          <!-- Replace checkbox icon, see https://stackoverflow.com/a/59573635 -->
+          <label
+            for="original-domain-toggle-checkbox"
+            data-i18n-title="blocked_toggle_original_domain_title"
+          ></label>
         </div>
+      </div>
 
-        <p class="non-ascii-domain warning-text hidden" data-i18n-formatted="blocked_non_ascii_warning_text"></p>
-        <p class=" button-bar">
-            <button id="open-button" type="button" data-i18n="blocked_button_open"></button>
-            <button id="revert-button" type="button"></button>
-        </p>
+      <p
+        class="non-ascii-domain warning-text hidden"
+        data-i18n-formatted="blocked_non_ascii_warning_text"
+      ></p>
+      <p class="button-bar">
+        <button
+          id="open-button"
+          type="button"
+          data-i18n="blocked_button_open"
+        ></button>
+        <button id="revert-button" type="button"></button>
+      </p>
     </main>
-</body>
-
+  </body>
 </html>

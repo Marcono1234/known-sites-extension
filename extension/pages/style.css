@@ -61,7 +61,11 @@ h1 {
 
 #domain-placeholder {
   /** Prefer sans-serif monospace fonts */
-  font-family: Consolas, Noto Mono, ui-monospace, monospace;
+  font-family:
+    Consolas,
+    Noto Mono,
+    ui-monospace,
+    monospace;
   font-size: 1.15em;
   text-align: center;
 
