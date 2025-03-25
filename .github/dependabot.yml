@@ -4,6 +4,12 @@ updates:
     directory: '/'
     schedule:
       interval: 'monthly'
+    groups:
+      # Name is used for branch name and pull request title
+      github-actions:
+        patterns:
+          # Create a single pull request for all actions
+          - '*'
 
   - package-ecosystem: 'npm'
     directory: '/'
