@@ -69,5 +69,12 @@
   },
   "blocked_button_close_tab": {
     "message": "Tab schließen"
+  },
+
+  "blocked_action_failed_error": {
+    "message": "Aktion ist fehlgeschlagen. (Fehler)"
+  },
+  "blocked_action_failed_incorrect_token": {
+    "message": "Aktion ist fehlgeschlagen. (Falsches Token)"
   }
 }

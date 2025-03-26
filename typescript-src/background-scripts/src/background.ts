@@ -2,7 +2,12 @@ import * as psl from 'psl'
 import { LRUCache } from 'lru-cache'
 // Use trailing slash to avoid import Node module
 import * as punycode from 'punycode/'
-import { MessageData, toPageUrlParamsString } from '../../common-src/common'
+import {
+  MessageData,
+  MessageDataOpenUrl,
+  MessageResponse,
+  toPageUrlParamsString,
+} from '../../common-src/common'
 
 const IS_FIREFOX: Promise<boolean> = (
   browser.runtime.getBrowserInfo === undefined
@@ -22,6 +27,20 @@ const IS_FIREFOX: Promise<boolean> = (
   console.info(`Is browser Firefox: ${isFirefox}`)
   return isFirefox
 })
+
+/**
+ * Token used to verify that a message really originated from the extension, and not
+ * that a malicious website opened the 'blocked page' with forged URL parameter values.
+ *
+ * For Firefox the risk for this might be lower because the internal UUID used in
+ * the extension page URL seems to be random per installation and is therefore
+ * difficult to guess for a malicious website (?). But for Chrome the extension ID
+ * used in the URL seems to be the same for all installations.
+ */
+const TOKEN = Array.from(crypto.getRandomValues(new Uint8Array(20)))
+  // convert to hex
+  .map((b) => b.toString(16).padStart(2, '0'))
+  .join('')
 
 // Disable lint: LRUCache has `{}` as bound
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -130,49 +149,72 @@ browser.history.onVisitRemoved.addListener((removed) => {
 })
 
 // Handle messages from blocking pages
-browser.runtime.onMessage.addListener(async (message: MessageData, sender) => {
-  console.debug('Received message', message, sender)
+browser.runtime.onMessage.addListener(
+  async (message: MessageData, sender): Promise<MessageResponse> => {
+    console.debug('Received message', message, sender)
 
-  const tabId = sender.tab?.id
-  if (tabId === undefined) {
-    console.error('Failed to get tab ID')
-    return
-  }
+    const tabId = sender.tab?.id
+    if (tabId === undefined) {
+      console.error('Failed to get tab ID')
+      return 'error'
+    }
 
-  const action = message.action
+    const token = message.token
+    if (token !== TOKEN) {
+      console.error(`Received incorrect token, expected ${TOKEN}`, message)
+      return 'incorrect-token'
+    }
 
-  if (action === 'open-url') {
-    const url = message.url
-    const domain = message.domain
-    const isIncognito = message.isIncognito
+    const action = message.action
 
-    console.info(`Received message to open URL from domain ${domain}`)
-    ;(isIncognito ? incognitoKnownDomainsCache : knownDomainsCache).add(domain)
+    if (action === 'check-token') {
+      // Token check already occurred above
+      return 'success'
+    } else if (action === 'open-url') {
+      return onOpenUrlMessage(tabId, message.data)
+    } else if (action === 'close-tab') {
+      console.info('Received message to close tab')
+      browser.tabs
+        .remove(tabId)
+        .catch((error) => console.error('Failed closing tab', error))
+    } else {
+      action satisfies never // ensure that if-else is exhaustive
+      console.error(`Unknown message action: ${action}`, message)
+      return 'error'
+    }
 
-    const updateProperties: browser.tabs._UpdateUpdateProperties =
-      (await IS_FIREFOX)
-        ? {
-            // Replace the extension tab
-            loadReplace: true,
-            url: url,
-          }
-        : {
-            // Chrome does not support loadReplace, see https://github.com/mdn/browser-compat-data/issues/15412
-            url: url,
-          }
+    return 'success'
+  },
+)
+
+async function onOpenUrlMessage(
+  tabId: number,
+  messageData: MessageDataOpenUrl,
+): Promise<MessageResponse> {
+  const url = messageData.url
+  const domain = messageData.domain
+  const isIncognito = messageData.isIncognito
+
+  console.info(`Received message to open URL from domain ${domain}`)
+  ;(isIncognito ? incognitoKnownDomainsCache : knownDomainsCache).add(domain)
+
+  const updateProperties: browser.tabs._UpdateUpdateProperties =
+    (await IS_FIREFOX)
+      ? {
+          // Replace the extension tab
+          loadReplace: true,
+          url: url,
+        }
+      : {
+          // Chrome does not support loadReplace, see https://github.com/mdn/browser-compat-data/issues/15412
+          url: url,
+        }
 
   browser.tabs.update(tabId, updateProperties).catch((error) => {
     console.error(`Failed opening URL ${url}`, error)
-    })
-  } else if (action === 'close-tab') {
-    console.info('Received message to close tab')
-    browser.tabs
-      .remove(tabId)
-      .catch((reason) => console.error('Failed closing tab', reason))
-  } else {
-    console.error(`Unknown message action: ${action}`, message)
-  }
-})
+  })
+  return 'success'
+}
 
 function parseDomain(url: string): string {
   let hostname: string
@@ -399,6 +441,7 @@ async function handleRequest(
       domain: nonPunycodeDomain,
       rawDomain: rawDomain,
       isIncognito: isIncognito,
+      token: TOKEN,
     })
     const blockingPageUrl = browser.runtime.getURL(
       `pages/blocked-unknown.html?${urlParams}`,

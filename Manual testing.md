@@ -205,6 +205,44 @@ The following symbols are used for the tests:
    :mag: The site should be blocked\
    :mag: The extension page should show `[2001:4860:4860::8888]` as hostname
 
+### HTML injection
+
+1. Open an unknown site, for example `example.com`\
+   :mag: The site should be blocked
+2. Edit the URL of the 'blocked page' (`moz-extension://...` or `chrome-extension://...`):\
+   Replace all of the URL parameter values (except for `token`) with `<script>alert("XSS")</script>`, for example something like:
+
+   ```text
+   .../blocked-unknown.html?url=<script>alert("XSS")</script>&domain=<script>alert("XSS")</script>&rawDomain=<script>alert("XSS")</script>&isIncognito=<script>alert("XSS")</script>&token=...
+   ```
+
+3. Open the modified URL\
+   :mag: The text `<script>alert("XSS")</script>` should appear literally\
+   :mag: No browser dialog should appear, saying "XSS"\
+   :mag: The browser debug console for the extension should not show any related warnings or errors
+
+4. Repeat steps 2 & 3, this time with `<script>alert("XSS ä")</script>`\
+   This time also click the eye icon of the extension page
+
+   ```text
+   .../blocked-unknown.html?url=<script>alert("XSS ä")</script>&domain=<script>alert("XSS ä")</script>&rawDomain=<script>alert("XSS ä")</script>&isIncognito=<script>alert("XSS ä")</script>&token=...
+   ```
+
+   :mag: This time the extension page should mention that non-ASCII characters were detected\
+   Clicking on the eye icon should not cause any of the events described in step 3 either
+
+### Invalid token
+
+1. Open an unknown site, for example `example.com`\
+   :mag: The site should be blocked
+2. Edit the URL of the 'blocked page' (`moz-extension://...` or `chrome-extension://...`):\
+   Modify the `token` URL parameter value, for example switch one letter
+3. Open the modified URL\
+   :mag: A dialog should appear saying that the token is incorrect\
+   :mag: The buttons of the extension page should do nothing / should show a dialog as well, but should not open any pages
+4. Repeat steps 2 & 3, this time completely removing the `token` parameter\
+   :mag: The same behavior as in step 3 should be observable
+
 ### Incognito / Private mode (Chrome)
 
 1. Open the extension settings and allow usage in Incognito windows

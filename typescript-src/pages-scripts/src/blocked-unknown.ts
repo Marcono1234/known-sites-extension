@@ -1,4 +1,9 @@
-import { fromPageUrlParams, MessageData } from '../../common-src/common'
+import {
+  ExtPageUrlParams,
+  fromPageUrlParams,
+  MessageData,
+  MessageResponse,
+} from '../../common-src/common'
 
 // Based on https://github.com/EFForg/https-everywhere/blob/579b8c59d078fd65d547a546b381c9ae45c61232/chromium/pages/translation.js
 function setI18nContent() {
@@ -127,13 +132,49 @@ function createHighlightedDomain(domain: string): HighlightResult | null {
     : null
 }
 
+/** Sends a message to the extension */
+function sendMessage(message: MessageData): Promise<void> {
+  return browser.runtime.sendMessage(message).then(
+    (response: MessageResponse) => {
+      if (response === 'success') {
+        console.debug(`Message ${message.action} was successfully processed`)
+        return
+      }
+
+      console.error(`Message ${message.action} was unsuccessful: ${response}`)
+      if (response === 'error') {
+        alert(browser.i18n.getMessage('blocked_action_failed_error'))
+      } else if (response === 'incorrect-token') {
+        alert(browser.i18n.getMessage('blocked_action_failed_incorrect_token'))
+      } else {
+        response satisfies never // ensure that if-else is exhaustive
+      }
+      throw new Error(`Message ${message.action} was unsuccessful: ${response}`)
+    },
+    (error) => {
+      console.error('Failed sending message', message, error)
+    },
+  )
+}
+
 // Based on https://github.com/EFForg/https-everywhere/blob/579b8c59d078fd65d547a546b381c9ae45c61232/chromium/pages/cancel/ux.js
 document.addEventListener('DOMContentLoaded', () => {
   const blockedPage = fromPageUrlParams(
     new URLSearchParams(window.location.search),
   )
+
+  // To be safe, check token before using any of the URL parameters, since they could
+  // be forged by a malicious website
+  const token = blockedPage.token
+  sendMessage({ action: 'check-token', token: token }).then(() =>
+    initializePage(blockedPage),
+  )
+})
+
+function initializePage(blockedPage: ExtPageUrlParams) {
   const blockedUrl = blockedPage.url
   const blockedDomain = blockedPage.domain
+  const token = blockedPage.token
 
   setI18nContent()
   // Sanitize domain to avoid having it interfere with title, e.g. due to right-to-left override
@@ -147,22 +188,18 @@ document.addEventListener('DOMContentLoaded', () => {
     console.info(`Sending message to open URL with domain ${blockedDomain}`)
 
     // Send message to let extension first add domain to cache and then open
-    // it (to avoid immediately blocking it again)
-    browser.runtime
-      .sendMessage({
-        action: 'open-url',
+    // it (to avoid immediately blocking it again), and also to validate token
+    sendMessage({
+      action: 'open-url',
+      token: token,
+      data: {
         url: blockedUrl,
         // Use raw domain value to use what the browser originally provided; assuming that
         // all APIs of the browser treat domain consistently
         domain: blockedPage.rawDomain,
         isIncognito: blockedPage.isIncognito,
-      } as MessageData)
-      .catch((reason) => {
-        console.error(
-          `Failed sending message to open blocked URL ${blockedUrl}`,
-          reason,
-        )
-      })
+      },
+    })
   })
 
   let revertButtonText: string
@@ -178,16 +215,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // window.close() only seems to work when tab was opened by script
       // Therefore let extension close the tab
-      browser.runtime
-        .sendMessage({
-          action: 'close-tab',
-        } as MessageData)
-        .catch((reason) => {
-          console.error(
-            'Failed sending message to close blocked page tab',
-            reason,
-          )
-        })
+      sendMessage({
+        action: 'close-tab',
+        token: token,
+      })
     }
   }
 
@@ -219,4 +250,4 @@ document.addEventListener('DOMContentLoaded', () => {
       domainPlaceholder.innerHTML = newHtml
     })
   }
-})
+}

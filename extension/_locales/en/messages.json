@@ -79,5 +79,12 @@
   "blocked_button_close_tab": {
     "message": "Close tab",
     "description": "Text of button for closing the tab."
+  },
+
+  "blocked_action_failed_error": {
+    "message": "Action failed. (error)"
+  },
+  "blocked_action_failed_incorrect_token": {
+    "message": "Action failed. (incorrect token)"
   }
 }
