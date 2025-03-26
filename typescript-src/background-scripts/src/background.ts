@@ -13,8 +13,8 @@ const IS_FIREFOX: Promise<boolean> = (
           console.info(`Browser name: ${browserName}`)
           return browserName.includes('Firefox')
         },
-        (reason) => {
-          console.warn('Failed getting browser info', reason)
+        (error) => {
+          console.warn('Failed getting browser info', error)
           return false
         },
       )
@@ -161,8 +161,8 @@ browser.runtime.onMessage.addListener(async (message: MessageData, sender) => {
             url: url,
           }
 
-    browser.tabs.update(tabId, updateProperties).catch((reason) => {
-      console.error(`Failed opening URL ${url}`, reason)
+  browser.tabs.update(tabId, updateProperties).catch((error) => {
+    console.error(`Failed opening URL ${url}`, error)
     })
   } else if (action === 'close-tab') {
     console.info('Received message to close tab')
@@ -175,7 +175,7 @@ browser.runtime.onMessage.addListener(async (message: MessageData, sender) => {
 })
 
 function parseDomain(url: string): string {
-  let hostname
+  let hostname: string
   try {
     hostname = new URL(url).hostname
   } catch (typeError) {
@@ -213,7 +213,7 @@ function parseDomain(url: string): string {
 }
 
 function parseOrigin(url: string): string {
-  let origin
+  let origin: string
   try {
     origin = new URL(url).origin
   } catch (typeError) {
@@ -410,8 +410,8 @@ async function handleRequest(
       .update(requestDetails.tabId, {
         url: blockingPageUrl,
       })
-      .catch((reason) => {
-        console.error(`Failed opening blocking page ${blockingPageUrl}`, reason)
+      .catch((error) => {
+        console.error(`Failed opening blocking page ${blockingPageUrl}`, error)
       })
 
     return {

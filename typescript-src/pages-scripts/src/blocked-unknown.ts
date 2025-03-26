@@ -165,8 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
       })
   })
 
-  let revertButtonText
-  let revertButtonAction
+  let revertButtonText: string
+  let revertButtonAction: () => void
 
   if (history.length > 1) {
     revertButtonText = browser.i18n.getMessage('blocked_button_back')
