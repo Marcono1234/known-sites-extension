@@ -132,7 +132,7 @@ function createHighlightedDomain(domain: string): HighlightResult | null {
     : null
 }
 
-/** Sends a message to the extension */
+/** Sends a message to the extension background script */
 function sendMessage(message: MessageData): Promise<void> {
   return browser.runtime.sendMessage(message).then(
     (response: MessageResponse) => {
