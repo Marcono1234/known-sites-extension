@@ -44,9 +44,13 @@ time differentiates between subdomains when their content is user controlled.
 
 ## Supported Browsers
 
-- Chrome Desktop (Incognito mode is not supported, because the
-  [extension page cannot be shown](https://developer.chrome.com/docs/extensions/reference/manifest/incognito#spanning))
-- Firefox Desktop
+- Firefox Desktop ([download from Mozilla Addons page](https://addons.mozilla.org/en-US/firefox/addon/known-sites/))
+- Chrome Desktop\
+  _Not fully supported:_
+  - Incognito mode is not supported, because the
+    [extension page cannot be shown](https://developer.chrome.com/docs/extensions/reference/manifest/incognito#spanning)
+  - [Issues with Google search](https://github.com/Marcono1234/known-sites-extension/issues/69)
+  - Will stop working when Chrome drops support for extension manifest v2
 
 Other browsers might not support all features needed by this extension.
 
