@@ -15,7 +15,7 @@ const IS_FIREFOX: Promise<boolean> = (
     : browser.runtime.getBrowserInfo().then(
         (browserInfo) => {
           const browserName = browserInfo.name
-          console.info(`Browser name: ${browserName}`)
+          console.debug(`Browser name: ${browserName}`)
           return browserName.includes('Firefox')
         },
         (error) => {
@@ -24,9 +24,36 @@ const IS_FIREFOX: Promise<boolean> = (
         },
       )
 ).then((isFirefox) => {
-  console.info(`Is browser Firefox: ${isFirefox}`)
+  console.debug(`Is browser Firefox: ${isFirefox}`)
   return isFirefox
 })
+
+/**
+ * Logs a debug message, but only if a debug flag has been set.
+ *
+ * Should be used for potentially sensitive messages (such as domain name) or verbose
+ * messages which should not be logged by default.
+ */
+function logDebug(message: string, ...args: unknown[]) {
+  /*
+   * Custom debug flag because even `console.debug` logs everything by default, the
+   * browser might just hide the debug messages by default.
+   * That could leak information because in the browser when debugging the extension
+   * it is possible to see console messages printed before the browser debug mode
+   * had been enabled.
+   *
+   * To set this debug flag, open the debug page for the extension background script,
+   * and enter `_KNOWN_SITES_DEBUG = true` in the Console.
+   *
+   * See also https://stackoverflow.com/q/79540106
+   */
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const enabled = (window as any)._KNOWN_SITES_DEBUG
+  if (enabled === true) {
+    console.debug(message, ...args)
+  }
+}
 
 /**
  * Token used to verify that a message really originated from the extension, and not
@@ -96,9 +123,7 @@ browser.windows.onCreated.addListener(async (newWindow) => {
 
   if (!hasOtherWindows) {
     // Acts as fallback in case cache was not cleared properly after last incognito window from last session was closed
-    console.info(
-      'Detected first opened window; clearing previous incognito cache',
-    )
+    logDebug('Detected first opened window; clearing previous incognito cache')
     incognitoKnownDomainsCache.clear()
   }
 })
@@ -108,9 +133,7 @@ browser.windows.onRemoved.addListener(async (windowId) => {
   ).some((window) => window.incognito && window.id !== windowId)
 
   if (!hasIncognitoWindow) {
-    console.info(
-      'No incognito window is open anymore; clearing incognito cache',
-    )
+    logDebug('No incognito window is open anymore; clearing incognito cache')
     incognitoKnownDomainsCache.clear()
   }
 })
@@ -118,9 +141,12 @@ browser.windows.onRemoved.addListener(async (windowId) => {
 browser.webRequest.onBeforeRequest.addListener(
   handleRequest,
   {
-    urls:
-      // Don't use <all_urls> because for Chrome that also includes the extension page
-      ['http://*/*', 'https://*/*', 'ftp://*/*'],
+    // Don't use <all_urls> because for Chrome that also includes the extension page
+    urls: ['http://*/*', 'https://*/*', 'ftp://*/*'],
+    // Only check top-level documents but not embedded content such as `<iframe>`, assuming that if
+    // site is trusted it does not embed untrusted content
+    // Embedded content cannot be blocked properly anyway because the extension page would replace
+    // the complete top-level document
     types: ['main_frame'],
   },
   ['blocking'],
@@ -129,21 +155,15 @@ browser.webRequest.onBeforeRequest.addListener(
 // Update cache when items were removed from browser history
 browser.history.onVisitRemoved.addListener((removed) => {
   if (removed.allHistory) {
-    console.info('Clearing known domains cache after history was cleared')
+    logDebug('Clearing known domains cache after history was cleared')
     knownDomainsCache.clear()
   } else {
-    const removedDomains = new Set<string>()
+    // Remove from cache, even if there are other history entries for domain remaining:
+    // in that case next time domain is opened, it will be found in history and added to cache again
+    logDebug('Removing domains from cache after history removal')
     removed.urls.forEach((url) => {
       const domain = parseDomain(url)
-
-      // Avoid duplicate log messages in case multiple URLs of same domain are removed
-      if (!removedDomains.has(domain)) {
-        removedDomains.add(domain)
-        console.info(
-          `Removing domain ${domain} from cache after history removal`,
-        )
-        knownDomainsCache.remove(domain)
-      }
+      knownDomainsCache.remove(domain)
     })
   }
 })
@@ -151,17 +171,21 @@ browser.history.onVisitRemoved.addListener((removed) => {
 // Handle messages from blocking pages
 browser.runtime.onMessage.addListener(
   async (message: MessageData, sender): Promise<MessageResponse> => {
-    console.debug('Received message', message, sender)
+    console.debug(`Received '${message.action}' message`)
 
     const tabId = sender.tab?.id
     if (tabId === undefined) {
-      console.error('Failed to get tab ID')
+      console.error('Failed to get tab ID', sender)
       return 'error'
     }
 
     const token = message.token
     if (token !== TOKEN) {
-      console.error(`Received incorrect token, expected ${TOKEN}`, message)
+      console.error(
+        `Received incorrect token, expected ${TOKEN}`,
+        message,
+        sender,
+      )
       return 'incorrect-token'
     }
 
@@ -173,13 +197,12 @@ browser.runtime.onMessage.addListener(
     } else if (action === 'open-url') {
       return onOpenUrlMessage(tabId, message.data)
     } else if (action === 'close-tab') {
-      console.info('Received message to close tab')
       browser.tabs
         .remove(tabId)
         .catch((error) => console.error('Failed closing tab', error))
     } else {
       action satisfies never // ensure that if-else is exhaustive
-      console.error(`Unknown message action: ${action}`, message)
+      console.error(`Unknown message action: ${action}`, message, sender)
       return 'error'
     }
 
@@ -195,7 +218,6 @@ async function onOpenUrlMessage(
   const domain = messageData.domain
   const isIncognito = messageData.isIncognito
 
-  console.info(`Received message to open URL from domain ${domain}`)
   ;(isIncognito ? incognitoKnownDomainsCache : knownDomainsCache).add(domain)
 
   const updateProperties: browser.tabs._UpdateUpdateProperties =
@@ -236,7 +258,7 @@ function parseDomain(url: string): string {
   // Match anything which looks like an IPv4 or IPv6 address
   const ipAddressRegex = /^(\d+\.\d+\.\d+\.\d+|\[[\d:]+\])$/
   if (ipAddressRegex.test(hostname)) {
-    console.info(`Detected hostname ${hostname} to be an IP address`)
+    logDebug(`Detected hostname ${hostname} to be an IP address`)
     return hostname
   }
 
@@ -340,11 +362,11 @@ async function isKnownSite(
   isIncognito: boolean,
 ): Promise<boolean> {
   if (knownDomainsCache.contains(domain)) {
-    console.info(`Found domain ${domain} in known domains cache`)
+    logDebug(`Found domain ${domain} in known domains cache`)
     return true
   }
   if (isIncognito && incognitoKnownDomainsCache.contains(domain)) {
-    console.info(`Found domain ${domain} in incognito known domains cache`)
+    logDebug(`Found domain ${domain} in incognito known domains cache`)
     return true
   }
 
@@ -352,14 +374,12 @@ async function isKnownSite(
 
   async function isKnownSiteFromBrowserData(): Promise<boolean> {
     if ((await hasVisits(url)) || (await hasVisits(origin))) {
-      console.info(`Found visits in history for domain ${domain}`)
+      logDebug(`Found visits in history for domain ${domain}`)
       return true
     }
 
     // Did not find exact match in history; try history search
-    console.info(
-      `Did not find visit for domain ${domain}; trying history search`,
-    )
+    logDebug(`Did not find visit for domain ${domain}; trying history search`)
     let historyItems = await browser.history.search({
       text: origin,
       // Get matching items from any point in the past
@@ -368,7 +388,7 @@ async function isKnownSite(
     })
 
     if (historyItems.some((item) => matchesHistoryItem(item, url, domain))) {
-      console.info(`Found match in history search results for domain ${domain}`)
+      logDebug(`Found match in history search results for domain ${domain}`)
       return true
     }
 
@@ -381,15 +401,15 @@ async function isKnownSite(
     })
 
     if (historyItems.some((item) => matchesHistoryItem(item, url, domain))) {
-      console.info(`Found match in history search results for domain ${domain}`)
+      logDebug(`Found match in history search results for domain ${domain}`)
       return true
     }
 
-    console.info(
+    logDebug(
       `Did not find history entry for domain ${domain}; trying bookmark search`,
     )
     if (await isBookmarkedSite(url, origin, domain)) {
-      console.info(`Found matching bookmark for domain ${domain}`)
+      logDebug(`Found matching bookmark for domain ${domain}`)
       return true
     }
 
@@ -399,7 +419,7 @@ async function isKnownSite(
   const timeStart = performance.now()
   const isKnown = await isKnownSiteFromBrowserData()
   const millisNeeded = performance.now() - timeStart
-  console.debug(`Lookup from browser data took ${millisNeeded}ms`)
+  logDebug(`Lookup from browser data took ${millisNeeded}ms`)
 
   if (isKnown) {
     // Add domain to cache
@@ -417,7 +437,7 @@ async function handleRequest(
   // Note: `incognito` is only supported by Firefox currently, but not other browsers, see
   // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/onBeforeRequest#browser_compatibility
   const isIncognito = requestDetails.incognito === true
-  console.debug(`Handling ${isIncognito ? 'incognito ' : ''}request for ${url}`)
+  logDebug(`Handling ${isIncognito ? 'incognito ' : ''}request for ${url}`)
 
   // Firefox already seems to provide this in punycode
   const rawDomain = parseDomain(url)
@@ -432,10 +452,10 @@ async function handleRequest(
   }
 
   if (await isKnownSite(url, rawDomain, isIncognito)) {
-    console.info(`Allowing access to known domain ${rawDomain}`)
+    logDebug(`Allowing access to known domain ${rawDomain}`)
     return {}
   } else {
-    console.info(`Blocking unknown domain ${rawDomain}`)
+    logDebug(`Blocking unknown domain ${rawDomain}`)
     const urlParams = toPageUrlParamsString({
       url: url,
       domain: nonPunycodeDomain,

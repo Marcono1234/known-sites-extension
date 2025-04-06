@@ -137,11 +137,11 @@ function sendMessage(message: MessageData): Promise<void> {
   return browser.runtime.sendMessage(message).then(
     (response: MessageResponse) => {
       if (response === 'success') {
-        console.debug(`Message ${message.action} was successfully processed`)
+        console.debug(`Message '${message.action}' was successfully processed`)
         return
       }
 
-      console.error(`Message ${message.action} was unsuccessful: ${response}`)
+      console.error(`Message '${message.action}' was unsuccessful: ${response}`)
       if (response === 'error') {
         alert(browser.i18n.getMessage('blocked_action_failed_error'))
       } else if (response === 'incorrect-token') {
@@ -149,7 +149,11 @@ function sendMessage(message: MessageData): Promise<void> {
       } else {
         response satisfies never // ensure that if-else is exhaustive
       }
-      throw new Error(`Message ${message.action} was unsuccessful: ${response}`)
+
+      // Mark Promise as rejected
+      throw new Error(
+        `Message '${message.action}' was unsuccessful: ${response}`,
+      )
     },
     (error) => {
       console.error('Failed sending message', message, error)
@@ -185,7 +189,7 @@ function initializePage(blockedPage: ExtPageUrlParams) {
 
   const openButton = document.getElementById('open-button')!
   openButton.addEventListener('click', () => {
-    console.info(`Sending message to open URL with domain ${blockedDomain}`)
+    console.info('Sending message to open URL')
 
     // Send message to let extension first add domain to cache and then open
     // it (to avoid immediately blocking it again), and also to validate token

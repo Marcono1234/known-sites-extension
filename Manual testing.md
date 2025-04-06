@@ -205,6 +205,30 @@ The following symbols are used for the tests:
    :mag: The site should be blocked\
    :mag: The extension page should show `[2001:4860:4860::8888]` as hostname
 
+### Extension logging
+
+1. Open the debug Console for the extension background script ([Firefox](https://extensionworkshop.com/documentation/develop/debugging/#debugging-background-scripts), [Chrome](https://developer.chrome.com/docs/extensions/mv2/tutorials/debugging#debug_bg))
+2. Open an unknown site, for example `example.com`\
+   :mag: The site should be blocked
+3. Click the "Go back" or "Close tab" button of the extension (but don't accidentally close the complete browser window)
+4. Open the unknown site again, this time click the "Open" button of the extension\
+   :mag: The site should open
+5. Open the previously unknown site another time\
+   :mag: It should not be blocked anymore
+6. Look at the debug Console of the extension background script (for Chrome make sure the "Verbose" log level is enabled)\
+   :mag: It should have logged none or only very few messages\
+   :mag: None of the logged messages should include the domain or the full URL of the unknown site
+7. In the Console, type:
+
+   ```javascript
+   _KNOWN_SITES_DEBUG = true
+   ```
+
+8. Open the previously unknown site another time\
+   :mag: It should not be blocked
+9. Look at the debug Console again\
+   :mag: This time it should have logged verbose messages, saying for example that the domain was found in the cache
+
 ### HTML injection
 
 1. Open an unknown site, for example `example.com`\
