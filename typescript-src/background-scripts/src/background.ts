@@ -109,22 +109,26 @@ const knownDomainsCache = new LRUCacheSet<string>(200)
 const incognitoKnownDomainsCache = new LRUCacheSet<string>(200)
 
 browser.windows.onCreated.addListener(async (newWindow) => {
-  if (newWindow.incognito && !(await IS_FIREFOX)) {
+  const isIncognito = newWindow.incognito
+  if (isIncognito && !(await IS_FIREFOX)) {
     // Note: This alert dialog is only shown when the user enabled the extension for incognito mode, otherwise
     // the listener is not notified about the newly created incognito window (as desired)
     // Note: `alert` might not work for all browsers, e.g. Firefox shows "alert() is not supported in background windows",
     // but at least in Chrome (where this message is shown) `alert` works
     alert(browser.i18n.getMessage('browser_incognito_unsupported'))
   }
+  if (isIncognito) {
+    const hasOtherIncognitoWindows = (
+      await browser.windows.getAll({ populate: false })
+    ).some((window) => window.incognito && window.id !== newWindow.id)
 
-  const hasOtherWindows = (
-    await browser.windows.getAll({ populate: false })
-  ).some((window) => window.id !== newWindow.id)
-
-  if (!hasOtherWindows) {
-    // Acts as fallback in case cache was not cleared properly after last incognito window from last session was closed
-    logDebug('Detected first opened window; clearing previous incognito cache')
-    incognitoKnownDomainsCache.clear()
+    if (!hasOtherIncognitoWindows) {
+      // Acts as fallback in case cache was not cleared properly after last incognito window was closed
+      logDebug(
+        'Detected first opened incognito window; clearing previous incognito cache',
+      )
+      incognitoKnownDomainsCache.clear()
+    }
   }
 })
 browser.windows.onRemoved.addListener(async (windowId) => {
