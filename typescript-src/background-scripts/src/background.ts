@@ -166,8 +166,10 @@ browser.history.onVisitRemoved.addListener((removed) => {
     // in that case next time domain is opened, it will be found in history and added to cache again
     logDebug('Removing domains from cache after history removal')
     removed.urls.forEach((url) => {
-      const domain = parseDomain(url)
-      knownDomainsCache.remove(domain)
+      const domain = parseDomain(url, true)
+      if (domain !== null) {
+        knownDomainsCache.remove(domain)
+      }
     })
   }
 })
@@ -242,15 +244,34 @@ async function onOpenUrlMessage(
   return 'success'
 }
 
-function parseDomain(url: string): string {
-  let hostname: string
+function parseDomain(url: string, ignoreUnsupportedProtocol: false): string
+function parseDomain(
+  url: string,
+  ignoreUnsupportedProtocol: true,
+): string | null
+function parseDomain(
+  url: string,
+  ignoreUnsupportedProtocol: boolean,
+): string | null {
+  let parsedUrl: URL
   try {
-    hostname = new URL(url).hostname
+    parsedUrl = new URL(url)
   } catch (typeError) {
     console.error(`Failed parsing URL ${url}`, typeError)
     // Fall back to using complete URL as domain
     return url
   }
+
+  if (ignoreUnsupportedProtocol) {
+    const protocol = parsedUrl.protocol.toLowerCase()
+    const supportedProtocols = new Set(['http:', 'https:', 'ftp:'])
+    if (!supportedProtocols.has(protocol)) {
+      logDebug(`URL has unsupported protocol '${protocol}'`, url)
+      return null
+    }
+  }
+
+  const hostname = parsedUrl.hostname
   if (hostname === '') {
     console.error(`URL ${url} has no hostname`)
     // Fall back to using complete URL as domain
@@ -308,7 +329,7 @@ function matchesHistoryItem(
   if (historyUrl === url) {
     return true
   } else if (historyUrl !== undefined) {
-    return parseDomain(historyUrl) === domain
+    return parseDomain(historyUrl, true) === domain
   } else {
     return false
   }
@@ -330,7 +351,7 @@ async function hasQueryBookmarkUrlMatch(
   })
   return (await bookmarks).some((bookmark) => {
     const url = bookmark.url
-    return url !== undefined && parseDomain(url) === domain
+    return url !== undefined && parseDomain(url, true) === domain
   })
 }
 
@@ -444,7 +465,7 @@ async function handleRequest(
   logDebug(`Handling ${isIncognito ? 'incognito ' : ''}request for ${url}`)
 
   // Firefox already seems to provide this in punycode
-  const rawDomain = parseDomain(url)
+  const rawDomain = parseDomain(url, false)
   let nonPunycodeDomain: string
   try {
     nonPunycodeDomain = punycode.toUnicode(rawDomain)
