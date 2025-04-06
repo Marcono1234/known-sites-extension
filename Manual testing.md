@@ -161,10 +161,14 @@ The following symbols are used for the tests:
 
 1. Open URLs with a scheme other than `http`, `https` or `ftp`, e.g.:
 
-   - A `file:///` URI
+   - A `file:///` URL
    - Under Chrome `chrome-extension://a/`
 
    :mag: The URL should not be blocked
+
+2. Enable extension debug logging (`_KNOWN_SITES_DEBUG = true`), see other test below
+3. Remove the `file:///` URL from the browser history\
+   :mag: An extension debug message should have been logged, saying the URL protocol is unsupported
 
 ### PSL domain `.co.uk`
 
