@@ -9,6 +9,9 @@ import {
   toPageUrlParamsString,
 } from '../../common-src/common'
 
+/** URL protocols (lowercase, with trailing ':') which are checked by the extension */
+const SUPPORTED_PROTOCOLS = ['http:', 'https:', 'ftp:']
+
 const IS_FIREFOX: Promise<boolean> = (
   browser.runtime.getBrowserInfo === undefined
     ? Promise.resolve(false)
@@ -146,7 +149,10 @@ browser.webRequest.onBeforeRequest.addListener(
   handleRequest,
   {
     // Don't use <all_urls> because for Chrome that also includes the extension page
-    urls: ['http://*/*', 'https://*/*', 'ftp://*/*'],
+    urls: SUPPORTED_PROTOCOLS.map((protocol) => {
+      // Match 'any host' with 'any path', see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns
+      return `${protocol}//*/*`
+    }),
     // Only check top-level documents but not embedded content such as `<iframe>`, assuming that if
     // site is trusted it does not embed untrusted content
     // Embedded content cannot be blocked properly anyway because the extension page would replace
@@ -262,12 +268,17 @@ function parseDomain(
     return url
   }
 
-  if (ignoreUnsupportedProtocol) {
-    const protocol = parsedUrl.protocol.toLowerCase()
-    const supportedProtocols = new Set(['http:', 'https:', 'ftp:'])
-    if (!supportedProtocols.has(protocol)) {
+  const protocol = parsedUrl.protocol.toLowerCase()
+  if (!SUPPORTED_PROTOCOLS.includes(protocol)) {
+    if (ignoreUnsupportedProtocol) {
       logDebug(`URL has unsupported protocol '${protocol}'`, url)
       return null
+    } else {
+      // Should normally not happen; if unsupported protocol is expected to occur, then
+      // caller should have set `ignoreUnsupportedProtocol = true`
+      console.error(`URL has unsupported protocol '${protocol}'`, url)
+      // Fall back to using complete URL as domain
+      return url
     }
   }
 
