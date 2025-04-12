@@ -157,9 +157,9 @@ The following symbols are used for the tests:
 3. Open the site `https://github.com`\
    :mag: The site should not be blocked
 
-### Allowed non-HTTP / non-FTP
+### Allowed non-HTTP
 
-1. Open URLs with a scheme other than `http`, `https` or `ftp`, e.g.:
+1. Open URLs with a scheme other than `http` or `https`, e.g.:
 
    - A `file:///` URL
    - Under Chrome `chrome-extension://a/`

@@ -10,7 +10,7 @@ import {
 } from '../../common-src/common'
 
 /** URL protocols (lowercase, with trailing ':') which are checked by the extension */
-const SUPPORTED_PROTOCOLS = ['http:', 'https:', 'ftp:']
+const SUPPORTED_PROTOCOLS = ['http:', 'https:']
 
 const IS_FIREFOX: Promise<boolean> = (
   browser.runtime.getBrowserInfo === undefined
