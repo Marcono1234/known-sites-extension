@@ -54,6 +54,14 @@ time differentiates between subdomains when their content is user controlled.
 
 Other browsers might not support all features needed by this extension.
 
+## Project structure
+
+- [`extension/`](./extension/)\
+  Content of the extension. This is the directory which is eventually used for building the extension.
+  It contains some static content, and generated files (such as compiled TypeScript code) which are copied there during the build.
+- [`typescript-src/`](./typescript-src/)\
+  TypeScript source code of the extension, which is compiled and copied to `extension/` during the build.
+
 ## Development
 
 1. Copy the polyfill file
