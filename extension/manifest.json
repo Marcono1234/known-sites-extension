@@ -2,6 +2,7 @@
   "manifest_version": 2,
   "name": "__MSG_manifest_extension_name__",
   "description": "__MSG_manifest_extension_description__",
+  "author": "Marcono1234",
   "homepage_url": "https://github.com/Marcono1234/known-sites-extension",
   "default_locale": "en",
   "version": "1.0.3",
@@ -15,7 +16,6 @@
     "96": "icon.svg"
   },
   "browser_action": {
-    "browser_style": true,
     "default_area": "navbar",
     "default_icon": "icon.svg",
     "default_title": "__MSG_browser_action_title__"
@@ -33,6 +33,5 @@
       "background-scripts/background.js"
     ],
     "persistent": true
-  },
-  "web_accessible_resources": ["pages/blocked-unknown.html", "icon.svg"]
+  }
 }

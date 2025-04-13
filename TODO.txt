@@ -3,3 +3,6 @@
 
 - ? Maybe use `incognito: split` once supported by Firefox
     https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/incognito
+
+    To be checked if `window` can be accessed for the `_KNOWN_SITES_DEBUG` flag then for the Incognito
+    background page, see limitation for related https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/extension/getBackgroundPage
