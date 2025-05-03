@@ -6,7 +6,7 @@
     "package": "npm clean-install && npm run build"
   },
   "devDependencies": {
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.3",
     "psl": "^1.15.0",
     "lru-cache": "^11.1.0",
     "punycode": "^2.3.1",
