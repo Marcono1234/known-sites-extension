@@ -2,7 +2,6 @@
   "compilerOptions": {
     "outDir": "out",
     "rootDir": ".",
-    "typeRoots": ["node_modules/@types"],
     "sourceMap": true,
     "strict": true,
     "module": "ES2022",

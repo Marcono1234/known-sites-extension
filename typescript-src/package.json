@@ -1,7 +1,0 @@
-{
-  "private": true,
-  "scripts": {
-    "build": "npm --prefix ./background-scripts run build && npm --prefix ./pages-scripts run build",
-    "package": "npm --prefix ./background-scripts clean-install && npm --prefix ./pages-scripts clean-install && npm run build"
-  }
-}

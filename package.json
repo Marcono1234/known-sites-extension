@@ -1,25 +1,29 @@
 {
   "name": "known-sites-extension",
   "private": true,
+  "workspaces": [
+    "typescript-src/background-scripts",
+    "typescript-src/pages-scripts"
+  ],
   "scripts": {
     "debug-firefox": "web-ext run --devtools --source-dir extension --target firefox-desktop",
     "debug-chromium": "web-ext run --source-dir extension --target chromium",
     "lint": "npx eslint . && npx prettier . --check",
     "lint-web-ext": "web-ext lint --source-dir extension",
     "copy-polyfill": "node -e \"const fs = require('fs'); fs.mkdirSync('./extension/web-ext-polyfill', { recursive: true }); fs.copyFileSync('./node_modules/webextension-polyfill/dist/browser-polyfill.js', './extension/web-ext-polyfill/browser-polyfill.js');\"",
-    "package": "npm clean-install && npm run copy-polyfill && npm --prefix ./typescript-src run package && web-ext build --overwrite-dest --source-dir extension"
+    "package": "npm clean-install && npm run copy-polyfill && npm --workspace=typescript-src run build && web-ext build --overwrite-dest --source-dir extension"
+  },
+  "dependencies": {
+    "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
-    "webextension-polyfill": "^0.12.0",
     "web-ext": "^8.4.0",
     "@eslint/js": "^9.26.0",
     "eslint": "^9.26.0",
-    "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.1",
     "prettier": "^3.5.3",
     "eslint-config-prettier": "^10.1.2"
   },
-  "dependencies": {},
   "prettier": {
     "tabWidth": 2,
     "semi": false,

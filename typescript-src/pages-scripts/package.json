@@ -2,15 +2,15 @@
   "private": true,
   "scripts": {
     "watch": "webpack --watch --mode=development",
-    "build": "webpack",
-    "package": "npm clean-install && npm run build"
+    "build": "webpack"
+  },
+  "dependencies": {
+    "typescript": "^5.8.3",
+    "@types/firefox-webext-browser": "^120.0.4"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
-    "@types/firefox-webext-browser": "^120.0.4",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1",
     "ts-loader": "^9.5.2"
-  },
-  "dependencies": {}
+  }
 }
