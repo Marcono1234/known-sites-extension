@@ -16,3 +16,9 @@ updates:
       - '**/*'
     schedule:
       interval: 'monthly'
+    groups:
+      # Name is used for branch name and pull request title
+      npm:
+        patterns:
+          # Create a single pull request for all dependencies
+          - '*'
