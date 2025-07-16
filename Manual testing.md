@@ -160,7 +160,6 @@ The following symbols are used for the tests:
 ### Allowed non-HTTP
 
 1. Open URLs with a scheme other than `http` or `https`, e.g.:
-
    - A `file:///` URL
    - Under Chrome `chrome-extension://a/`
 
