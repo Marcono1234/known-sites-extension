@@ -70,28 +70,30 @@ function isAscii(codepoint: number | undefined): boolean {
   return codepoint !== undefined && codepoint >= 32 && codepoint <= 126
 }
 
-function createSanitizedDomainForTitle(domain: string): string {
+function createAsciiOnlyDomainForTitle(domain: string): string {
   // Note: Could probably also implement this with regex checking for negated range
-  let sanitized = ''
+  let asciiDomain = ''
   for (const c of domain) {
     if (isAscii(c.codePointAt(0))) {
-      sanitized += c
+      asciiDomain += c
     } else {
-      sanitized += '?'
+      asciiDomain += '?'
     }
   }
 
-  return sanitized
+  return asciiDomain
 }
 
 type HighlightResult = {
-  sanitizedDomainHtml: string
+  asciiOnlyDomainHtml: string
   originalDomainHtml: string
 }
 
 /** Creates highlighting data for non-ASCII domains, or `null` if the domain is ASCII-only */
 function createHighlightedDomain(domain: string): HighlightResult | null {
-  let sanitizedResultHtml = ''
+  // HTML for the converted domain, where all non-ASCII chars have been replaced
+  let asciiOnlyResultHtml = ''
+  // HTML for the original domain, containing non-ASCII chars
   let originalResultHtml = ''
   let hasNonAscii = false
   // Used to track spans of multiple non-ASCII chars
@@ -104,14 +106,14 @@ function createHighlightedDomain(domain: string): HighlightResult | null {
     // Check if ASCII
     if (isAscii(codepoint)) {
       const toAdd = (wasLastNonAscii ? '</span>' : '') + escapedChar
-      sanitizedResultHtml += toAdd
+      asciiOnlyResultHtml += toAdd
       originalResultHtml += toAdd
 
       wasLastNonAscii = false
     } else {
       hasNonAscii = true
       const prefix = wasLastNonAscii ? '' : '<span class="non-ascii-char">'
-      sanitizedResultHtml += prefix + '?'
+      asciiOnlyResultHtml += prefix + '?'
       originalResultHtml += prefix + escapedChar
 
       wasLastNonAscii = true
@@ -120,13 +122,13 @@ function createHighlightedDomain(domain: string): HighlightResult | null {
 
   if (wasLastNonAscii) {
     const toAdd = '</span>'
-    sanitizedResultHtml += toAdd
+    asciiOnlyResultHtml += toAdd
     originalResultHtml += toAdd
   }
 
   return hasNonAscii
     ? {
-        sanitizedDomainHtml: sanitizedResultHtml,
+        asciiOnlyDomainHtml: asciiOnlyResultHtml,
         originalDomainHtml: originalResultHtml,
       }
     : null
@@ -181,10 +183,10 @@ function initializePage(blockedPage: ExtPageUrlParams) {
   const token = blockedPage.token
 
   setI18nContent()
-  // Sanitize domain to avoid having it interfere with title, e.g. due to right-to-left override
+  // Replace non-ASCII chars in domain to avoid having it interfere with title, e.g. due to right-to-left override
   document.title = browser.i18n.getMessage(
     'blocked_window_title',
-    createSanitizedDomainForTitle(blockedDomain),
+    createAsciiOnlyDomainForTitle(blockedDomain),
   )
 
   const openButton = document.getElementById('open-button')!
@@ -236,8 +238,8 @@ function initializePage(blockedPage: ExtPageUrlParams) {
   if (highlightedDomainHtmls === null) {
     domainPlaceholder.textContent = blockedDomain
   } else {
-    // Initially show encoded representation
-    domainPlaceholder.innerHTML = highlightedDomainHtmls.sanitizedDomainHtml
+    // Initially show masked representation
+    domainPlaceholder.innerHTML = highlightedDomainHtmls.asciiOnlyDomainHtml
     for (const element of document.getElementsByClassName('non-ascii-domain')) {
       // Show warning element
       element.classList.remove('hidden')
@@ -250,7 +252,7 @@ function initializePage(blockedPage: ExtPageUrlParams) {
       const isChecked = (event.target as HTMLInputElement).checked === true
       const newHtml = isChecked
         ? highlightedDomainHtmls.originalDomainHtml
-        : highlightedDomainHtmls.sanitizedDomainHtml
+        : highlightedDomainHtmls.asciiOnlyDomainHtml
       domainPlaceholder.innerHTML = newHtml
     })
   }
