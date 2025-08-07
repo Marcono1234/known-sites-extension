@@ -505,6 +505,8 @@ async function handleRequest(
 
     // Cannot return blocking page URL in `redirectUrl` because Firefox already records original URL in history
     // As (hacky?) workaround instead load the blocking page manually
+    // Using `tabs.update` also has the advantage that the page can be loaded without having to be specified
+    // in `web_accessible_resources` (which might otherwise increase the attack surface of the extension)
     browser.tabs
       .update(requestDetails.tabId, {
         url: blockingPageUrl,
