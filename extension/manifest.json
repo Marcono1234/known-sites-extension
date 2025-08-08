@@ -5,7 +5,7 @@
   "author": "Marcono1234",
   "homepage_url": "https://github.com/Marcono1234/known-sites-extension",
   "default_locale": "en",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "browser_specific_settings": {
     "gecko": {
       "id": "known-sites@marcono1234.invalid"
