@@ -1,9 +1,4 @@
-> [!WARNING]\
-> This is a hobby project and might not provide good protection. Do not rely on it for professional phishing protection.
-
----
-
-# <img src="extension/icon.svg" alt="Logo" width="30"> Known Sites
+# <div align="center"> <img src="extension/icon.svg" alt="Logo" width="30"> Known Sites </br> [![Mozilla Add-on Version](https://img.shields.io/amo/v/known-sites)](https://addons.mozilla.org/en-US/firefox/addon/known-sites/) </div>
 
 Browser extension blocking websites the user has not opened before.
 
@@ -12,13 +7,19 @@ Users should however still be **vigilant when opening links**. This extension mi
 might be disabled in certain situations (e.g. in a Firefox private window, without the extension being enabled for
 Private Browsing), and might not be installed on all devices of the user.
 
+> [!WARNING]\
+> This is a hobby project and might not provide good protection. Do not rely on it for professional phishing protection.
+
 ## Usage
 
-Every time the user opens a new website, the extension checks if the user has opened the website before (i.e. if it is a 'known site' to
-the user). If this is not the case, loading of the website is blocked and a warning page is shown. On that page the user is informed that
-they have not opened the website before. They then have the choice to open the website, or to go to previous website / close the tab.
-When the user choses to open the website, this choice is temporarily stored, and additionally because the browser adds it to the history,
+Every time you open a new website, the extension checks if you had opened the website before (i.e. if it is a 'known site' to you). If this is not the case, loading of the website is blocked and a warning page is shown. On that page you are informed that
+you had not opened the website before. You then have the choice to open the website, or to go to previous website / close the tab.
+When you choose to open the website, this choice is temporarily stored, and additionally because the browser adds the website to the history,
 it will be considered 'known' next time; see the sections below.
+
+Generally, it depends on the context whether an 'unknown' website is a potential danger. For example when you want to read a blog post, then it might be safe to open that unknown website. But keep in mind that the owner of the website could also host malicious content on other pages of the website, which would then be considered 'known' as well, so only open unknown websites which you trust to some extent.\
+Whereas when an e-mail tells you to check the security settings of your online banking account and you encounter an unknown website when clicking the link in the e-mail (which you should probably avoid in the first place), then this might be rather suspicious.\
+It is important that you still remain vigilant when using this extension.
 
 An icon in the browser toolbar indicates that the extension is active; it can be removed if desired ([Firefox documentation](https://support.mozilla.org/en-US/kb/customize-firefox-controls-buttons-and-toolbars)).
 
@@ -30,8 +31,8 @@ A website is considered 'known' to the user if any of the following applies:
 - a browser bookmark with the same domain exists
 
 The extension uses the [Public Suffix List](https://publicsuffix.org/) (possibly a slightly outdated version) for obtaining the domain.
-This avoid false positives when the content for the domain and all its subdomains is created by the domain owner, but at the same
-time differentiates between subdomains when their content is user controlled.
+This avoids false positives when the content for the domain and all its subdomains is created by the domain owner, but at the same
+time differentiates between subdomains when their content is user-controlled.
 
 ### Usage notes
 
