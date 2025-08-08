@@ -12,6 +12,9 @@ import {
 /** URL protocols (lowercase, with trailing ':') which are checked by the extension */
 const SUPPORTED_PROTOCOLS = ['http:', 'https:']
 
+/**
+ * Whether the browser is Firefox. If it cannot be determined, then the value is `false`.
+ */
 const IS_FIREFOX: Promise<boolean> = (
   browser.runtime.getBrowserInfo === undefined
     ? Promise.resolve(false)
@@ -180,7 +183,7 @@ browser.history.onVisitRemoved.addListener((removed) => {
   }
 })
 
-// Handle messages from blocking pages
+// Handle messages from the extension blocking page
 browser.runtime.onMessage.addListener(
   async (message: MessageData, sender): Promise<MessageResponse> => {
     console.debug(`Received '${message.action}' message`)
@@ -255,6 +258,16 @@ function parseDomain(
   url: string,
   ignoreUnsupportedProtocol: true,
 ): string | null
+/**
+ * Parses and returns the domain from the URL, using the Public Suffix List (PSL)
+ * to omit irrelevant subdomains.
+ *
+ * @param ignoreUnsupportedProtocol if `true` returns `null` if the URL protocol
+ *    is unsupported; if `false` an error is logged and the complete URL is returned
+ * @returns the domain of the URL, the complete URL (in case of parsing errors or
+ *    an unsupported URL protocol with `ignoreUnsupportedProtocol = false`), or `null`
+ *    (with `ignoreUnsupportedProtocol = true`)
+ */
 function parseDomain(
   url: string,
   ignoreUnsupportedProtocol: boolean,
@@ -312,6 +325,12 @@ function parseDomain(
   }
 }
 
+/**
+ * Parses and returns the origin of the URL (i.e. protocol + host + port (optional)).
+ * Returns the URL as is if it cannot be parsed.
+ *
+ * @returns the origin of the URL, or the URL as is
+ */
 function parseOrigin(url: string): string {
   let origin: string
   try {
@@ -330,47 +349,60 @@ function parseOrigin(url: string): string {
   return origin
 }
 
-function matchesHistoryItem(
-  historyItem: browser.history.HistoryItem,
-  url: string,
-  domain: string,
-): boolean {
-  const historyUrl = historyItem.url
-
-  if (historyUrl === url) {
-    return true
-  } else if (historyUrl !== undefined) {
-    return parseDomain(historyUrl, true) === domain
-  } else {
-    return false
-  }
-}
-
-async function hasExactBookmarkUrlMatch(url: string): Promise<boolean> {
-  const bookmarks = browser.bookmarks.search({
-    url: url,
-  })
-  return (await bookmarks).length > 0
-}
-
-async function hasQueryBookmarkUrlMatch(
-  queryString: string,
-  domain: string,
-): Promise<boolean> {
-  const bookmarks = browser.bookmarks.search({
-    query: queryString,
-  })
-  return (await bookmarks).some((bookmark) => {
-    const url = bookmark.url
-    return url !== undefined && parseDomain(url, true) === domain
-  })
-}
-
-async function isBookmarkedSite(
+async function isSiteInHistory(
   url: string,
   origin: string,
   domain: string,
 ): Promise<boolean> {
+  async function isInHistory(text: string): Promise<boolean> {
+    const historyItems = await browser.history.search({
+      text: text,
+      // Get matching items from any point in the past
+      startTime: 0,
+      maxResults: 100,
+    })
+
+    return historyItems.some((item) => {
+      const historyUrl = item.url
+
+      return (
+        historyUrl === url ||
+        (historyUrl !== undefined && parseDomain(historyUrl, true) === domain)
+      )
+    })
+  }
+
+  // First try searching by `origin`; should lead to less irrelevant history results compared to using `domain`
+  // (because history search is based on contained text, and could match the title or parts of URL path of
+  // unrelated history entries)
+  return (await isInHistory(origin)) || (await isInHistory(domain))
+}
+
+async function isSiteBookmarked(
+  url: string,
+  origin: string,
+  domain: string,
+): Promise<boolean> {
+  async function hasExactBookmarkUrlMatch(url: string): Promise<boolean> {
+    const bookmarks = await browser.bookmarks.search({
+      url: url,
+    })
+    return bookmarks.length > 0
+  }
+
+  async function hasQueryBookmarkUrlMatch(
+    queryString: string,
+    domain: string,
+  ): Promise<boolean> {
+    const bookmarks = await browser.bookmarks.search({
+      query: queryString,
+    })
+    return bookmarks.some((bookmark) => {
+      const url = bookmark.url
+      return url !== undefined && parseDomain(url, true) === domain
+    })
+  }
+
   return (
     (await hasExactBookmarkUrlMatch(url)) ||
     (await hasExactBookmarkUrlMatch(origin)) ||
@@ -380,7 +412,7 @@ async function isBookmarkedSite(
   )
 }
 
-async function hasVisits(url: string): Promise<boolean> {
+async function isSiteInVisits(url: string): Promise<boolean> {
   const visits = await browser.history.getVisits({
     url: url,
   })
@@ -409,34 +441,13 @@ async function isKnownSite(
   const origin = parseOrigin(url)
 
   async function isKnownSiteFromBrowserData(): Promise<boolean> {
-    if ((await hasVisits(url)) || (await hasVisits(origin))) {
+    if ((await isSiteInVisits(url)) || (await isSiteInVisits(origin))) {
       logDebug(`Found visits in history for domain ${domain}`)
       return true
     }
 
-    // Did not find exact match in history; try history search
     logDebug(`Did not find visit for domain ${domain}; trying history search`)
-    let historyItems = await browser.history.search({
-      text: origin,
-      // Get matching items from any point in the past
-      startTime: 0,
-      maxResults: 100,
-    })
-
-    if (historyItems.some((item) => matchesHistoryItem(item, url, domain))) {
-      logDebug(`Found match in history search results for domain ${domain}`)
-      return true
-    }
-
-    // Fall back to domain search
-    historyItems = await browser.history.search({
-      text: domain,
-      // Get matching items from any point in the past
-      startTime: 0,
-      maxResults: 100,
-    })
-
-    if (historyItems.some((item) => matchesHistoryItem(item, url, domain))) {
+    if (await isSiteInHistory(url, origin, domain)) {
       logDebug(`Found match in history search results for domain ${domain}`)
       return true
     }
@@ -444,7 +455,7 @@ async function isKnownSite(
     logDebug(
       `Did not find history entry for domain ${domain}; trying bookmark search`,
     )
-    if (await isBookmarkedSite(url, origin, domain)) {
+    if (await isSiteBookmarked(url, origin, domain)) {
       logDebug(`Found matching bookmark for domain ${domain}`)
       return true
     }
