@@ -2,21 +2,32 @@
 
 The following manual tests can be performed to verify that the extension works correctly. It is recommended to
 perform them with a fresh browser profile, for example by starting the browser using `web-ext run` (see `package.json`
-scripts), to get consistent behavior.
+scripts), to get consistent behavior. Make sure that you performed a build (`npm run package`) after your last changes.
 
 In the following, 'unknown site' refers to a website which would by default be blocked by the extension because
 the user has never visited it before.
 
 It is recommended to also have a look at the console output during testing to verify that the extension behaves
-as expected, and to make sure that no errors occur:
-
-- [Firefox documentation](https://extensionworkshop.com/documentation/develop/debugging/)
-- [Chrome documentation](https://developer.chrome.com/docs/extensions/mv3/tut_debugging/)
+as expected, and to make sure that no errors occur, see the [Extension log](#extension-log) section.
 
 The following symbols are used for the tests:
 
 - :mag: Describes the expected outcome
 - :information_source: An important note about the test, for example a browser incompatibility
+
+## Extension log
+
+The extension logs messages to the console of the background script. To open this console:
+
+- [Firefox](https://extensionworkshop.com/documentation/develop/debugging/#debugging-background-scripts)
+- [Chrome](https://developer.chrome.com/docs/extensions/mv2/tutorials/debugging#debug_bg)\
+  Chrome hides "debug" messages by default; make sure the "Verbose" log level is enabled in the console tab.
+
+By default the extension logs only limited information to the console to avoid leaking sensitive information. To enable debug logging for the extension, execute the following JavaScript expression in the console of the extension background script. Subsequent logging should then be more verbose, for example it should mention which domain is being accessed.
+
+```javascript
+_KNOWN_SITES_DEBUG = true
+```
 
 ## Tests
 
@@ -39,11 +50,11 @@ The following symbols are used for the tests:
    :mag: The site should not appear in the history yet
 3. Click the "Open" button of the extension page\
    :mag: The site should be opened
-4. Check the browser history navigation buttons (forward, backward)\
+4. Check the browser history again\
+   :mag: The site should be listed in the history
+5. Check the browser history navigation buttons (forward, backward)\
    :mag: The extension page should not be listed\
    :information_source: Does not work for Chrome
-5. Check the browser history again\
-   :mag: The site should be listed in the history
 
 ### Open blocked complex URL
 
@@ -58,10 +69,12 @@ The following symbols are used for the tests:
    :mag: The site should be blocked\
    :mag: The extension page should inform the user that the domain contains non-ASCII characters\
    :mag: The domain should be shown in the title of the tab, with non-ASCII characters replaced with `?`\
-   :mag: The extension page should the domain with non-ASCII characters replaced with `?` and highlighted in red
+   :mag: The extension page should show the domain with non-ASCII characters replaced with `?` and highlighted in red
 2. Click the eye icon on the extension page\
+   :mag: The eye icon should have become crossed out\
    :mag: The domain should show the non-ASCII characters, highlighted in red
 3. Click the crossed out eye icon on the extension page\
+   :mag: The original (non crossed out) eye icon should be shown again\
    :mag: The extension page should show `?` as replacement for non-ASCII characters again
 
 ### Blocked "Go back"
@@ -128,16 +141,20 @@ The following symbols are used for the tests:
 3. Check the browser history\
    :mag: The site should appear in the history
 4. Enable the extension
-5. In a separate tab, open the site (e.g. `example.com`) again\
-   :mag: The site should not be blocked (and the log should indicate that the site was found in the history)
-6. Delete the site from the browser history\
-   :mag: The site should be blocked (and the log should indicate that the site was removed from history)
+5. Enable extension debug logging (`_KNOWN_SITES_DEBUG = true`), see the [Extension log](#extension-log) section
+6. Open the site (e.g. `example.com`) again\
+   :mag: The site should not be blocked (and the debug log should indicate that the site was found in the history)
+7. Delete the site from the browser history\
+   :mag: The extension debug log should indicate that the site was removed from history
+8. Open the site (e.g. `example.com`) again\
+   :mag: The site should be blocked
 
 ### Allowed when bookmarked
 
 1. Add a bookmark for an unknown site, for example `example.com`
-2. Open the site (e.g. `example.com`)\
-   :mag: The site should not be blocked (and the log should indicate that a matching bookmark was found)
+2. Enable extension debug logging (`_KNOWN_SITES_DEBUG = true`), see the [Extension log](#extension-log) section
+3. Open the site (e.g. `example.com`)\
+   :mag: The site should not be blocked (and the debug log should indicate that a matching bookmark was found)
 
 ### Allowed subdomain (first parent domain)
 
@@ -165,7 +182,7 @@ The following symbols are used for the tests:
 
    :mag: The URL should not be blocked
 
-2. Enable extension debug logging (`_KNOWN_SITES_DEBUG = true`), see other test below
+2. Enable extension debug logging (`_KNOWN_SITES_DEBUG = true`), see the [Extension log](#extension-log) section
 3. Remove the `file:///` URL from the browser history\
    :mag: An extension debug message should have been logged, saying the URL protocol is unsupported
 
@@ -210,7 +227,7 @@ The following symbols are used for the tests:
 
 ### Extension logging
 
-1. Open the debug Console for the extension background script ([Firefox](https://extensionworkshop.com/documentation/develop/debugging/#debugging-background-scripts), [Chrome](https://developer.chrome.com/docs/extensions/mv2/tutorials/debugging#debug_bg))
+1. Open the console of the extension background script, see the [Extension log](#extension-log) section (but don't enable debug logging yet)
 2. Open an unknown site, for example `example.com`\
    :mag: The site should be blocked
 3. Click the "Go back" or "Close tab" button of the extension (but don't accidentally close the complete browser window)
@@ -218,18 +235,13 @@ The following symbols are used for the tests:
    :mag: The site should open
 5. Open the previously unknown site another time\
    :mag: It should not be blocked anymore
-6. Look at the debug Console of the extension background script (for Chrome make sure the "Verbose" log level is enabled)\
+6. Look at the console of the extension background script (for Chrome make sure the "Verbose" log level is enabled)\
    :mag: It should have logged none or only very few messages\
    :mag: None of the logged messages should include the domain or the full URL of the unknown site
-7. In the Console, type:
-
-   ```javascript
-   _KNOWN_SITES_DEBUG = true
-   ```
-
+7. Enable extension debug logging (`_KNOWN_SITES_DEBUG = true`), see the [Extension log](#extension-log) section
 8. Open the previously unknown site another time\
    :mag: It should not be blocked
-9. Look at the debug Console again\
+9. Look at the console again\
    :mag: This time it should have logged verbose messages, saying for example that the domain was found in the cache
 
 ### HTML injection
@@ -246,7 +258,7 @@ The following symbols are used for the tests:
 3. Open the modified URL\
    :mag: The text `<script>alert("XSS")</script>` should appear literally\
    :mag: No browser dialog should appear, saying "XSS"\
-   :mag: The browser debug console for the extension should not show any related warnings or errors
+   :mag: Neither the console of the extension background script (see [Extension log](#extension-log) section) nor the console of the blocked page should show any related warnings or errors
 
 4. Repeat steps 2 & 3, this time with `<script>alert("XSS ä")</script>`\
    This time also click the eye icon of the extension page
