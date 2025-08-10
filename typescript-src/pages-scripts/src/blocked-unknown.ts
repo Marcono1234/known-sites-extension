@@ -203,7 +203,6 @@ function initializePage(blockedPage: ExtPageUrlParams) {
         // Use raw domain value to use what the browser originally provided; assuming that
         // all APIs of the browser treat domain consistently
         domain: blockedPage.rawDomain,
-        isIncognito: blockedPage.isIncognito,
       },
     })
   })

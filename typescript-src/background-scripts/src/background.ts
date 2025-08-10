@@ -231,7 +231,7 @@ async function onOpenUrlMessage(
 ): Promise<MessageResponse> {
   const url = messageData.url
   const domain = messageData.domain
-  const isIncognito = messageData.isIncognito
+  const isIncognito = (await browser.tabs.get(tabId)).incognito
 
   ;(isIncognito ? incognitoKnownDomainsCache : knownDomainsCache).add(domain)
 
@@ -507,7 +507,6 @@ async function handleRequest(
       url: url,
       domain: nonPunycodeDomain,
       rawDomain: rawDomain,
-      isIncognito: isIncognito,
       token: TOKEN,
     })
     const blockingPageUrl = browser.runtime.getURL(

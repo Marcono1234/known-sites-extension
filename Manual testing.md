@@ -252,7 +252,7 @@ _KNOWN_SITES_DEBUG = true
    Replace all of the URL parameter values (except for `token`) with `<script>alert("XSS")</script>`, for example something like:
 
    ```text
-   .../blocked-unknown.html?url=<script>alert("XSS")</script>&domain=<script>alert("XSS")</script>&rawDomain=<script>alert("XSS")</script>&isIncognito=<script>alert("XSS")</script>&token=...
+   .../blocked-unknown.html?url=<script>alert("XSS")</script>&domain=<script>alert("XSS")</script>&rawDomain=<script>alert("XSS")</script>&token=...
    ```
 
 3. Open the modified URL\
@@ -264,7 +264,7 @@ _KNOWN_SITES_DEBUG = true
    This time also click the eye icon of the extension page
 
    ```text
-   .../blocked-unknown.html?url=<script>alert("XSS ä")</script>&domain=<script>alert("XSS ä")</script>&rawDomain=<script>alert("XSS ä")</script>&isIncognito=<script>alert("XSS ä")</script>&token=...
+   .../blocked-unknown.html?url=<script>alert("XSS ä")</script>&domain=<script>alert("XSS ä")</script>&rawDomain=<script>alert("XSS ä")</script>&token=...
    ```
 
    :mag: This time the extension page should mention that non-ASCII characters were detected\

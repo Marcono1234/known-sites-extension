@@ -18,7 +18,6 @@ export type MessageData =
 export type MessageDataOpenUrl = {
   url: string
   domain: string
-  isIncognito: boolean
 }
 
 /** Response to a message from the content script */
@@ -29,7 +28,6 @@ export type ExtPageUrlParams = {
   url: string
   domain: string
   rawDomain: string
-  isIncognito: boolean
   token: string
 }
 
@@ -40,7 +38,6 @@ export function toPageUrlParamsString(params: ExtPageUrlParams): string {
   urlParams.append('url', params.url)
   urlParams.append('domain', params.domain)
   urlParams.append('rawDomain', params.rawDomain)
-  urlParams.append('isIncognito', params.isIncognito.toString())
   urlParams.append('token', params.token)
   return urlParams.toString()
 }
@@ -50,7 +47,6 @@ export function fromPageUrlParams(params: URLSearchParams): ExtPageUrlParams {
     url: params.get('url')!,
     domain: params.get('domain')!,
     rawDomain: params.get('rawDomain')!,
-    isIncognito: params.get('isIncognito')! === 'true',
     token: params.get('token')!,
   }
 }
