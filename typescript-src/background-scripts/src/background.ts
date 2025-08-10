@@ -481,6 +481,16 @@ async function handleRequest(
   requestDetails: browser.webRequest._OnBeforeSendHeadersDetails,
 ): Promise<browser.webRequest.BlockingResponse> {
   const url = requestDetails.url
+
+  // Allow implicit requests when user types in Chrome search bar, see https://github.com/Marcono1234/known-sites-extension/issues/69
+  // For now only handle this for non-Firefox browsers; if this ever occurs in Firefox, would have
+  // to check in which situations it occurs and whether the request should be blocked in these situations
+  if (requestDetails.tabId == browser.tabs.TAB_ID_NONE && !(await IS_FIREFOX)) {
+    logDebug(`Detected implicit request for ${url}`)
+    console.debug('Allowing request which is not related to a tab')
+    return {}
+  }
+
   // Note: `incognito` is only supported by Firefox currently, but not other browsers, see
   // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/onBeforeRequest#browser_compatibility
   const isIncognito = requestDetails.incognito === true
