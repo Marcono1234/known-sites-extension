@@ -10,7 +10,7 @@
     "lru-cache": "^11.2.2",
     "punycode": "^2.3.1",
     "@types/punycode": "^2.1.4",
-    "@types/firefox-webext-browser": "^120.0.5"
+    "@types/firefox-webext-browser": "^143.0.0"
   },
   "devDependencies": {
     "webpack": "^5.102.0",
