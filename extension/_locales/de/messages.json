@@ -24,6 +24,10 @@
     }
   },
 
+  "blocked_html_lang": {
+    "message": "de"
+  },
+
   "blocked_window_title": {
     "message": "Blockiert – $DOMAIN$",
     "placeholders": {

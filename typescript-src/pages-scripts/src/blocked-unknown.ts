@@ -7,6 +7,10 @@ import {
 
 // Based on https://github.com/EFForg/https-everywhere/blob/579b8c59d078fd65d547a546b381c9ae45c61232/chromium/pages/translation.js
 function setI18nContent() {
+  // Use a translation string here instead of e.g. `i18n.getUILanguage()` to actually match the translation
+  // being used, for example in case the UI language is not supported and `default_locale` was used for translation
+  document.documentElement.lang = browser.i18n.getMessage('blocked_html_lang')
+
   /** Set translated text based on data attributes */
   function setI18nContent(
     dataSuffix: string,
