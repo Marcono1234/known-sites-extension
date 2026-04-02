@@ -206,6 +206,26 @@ _KNOWN_SITES_DEBUG = true
    :mag: The site should be blocked\
    :mag: The extension page should show the complete `google.github.io` domain
 
+### Domain with trailing dot
+
+Despite being rather uncommon, domains in URLs can have a trailing dot, see also [this question](https://webmasters.stackexchange.com/q/73934).
+The exact behavior of the extension regarding this does not matter since such URLs are uncommon; however what is important is that this does not allow circumventing the PSL (i.e. subdomains not being treated as separate anymore).
+
+1. Open an unknown site under the `.github.io` domain (with a trailing dot), for example `https://octocat.github.io./`\
+   :mag: The site should be blocked\
+   :mag: The extension page should show the complete `octocat.github.io.` domain (with trailing dot)
+2. Click the "Open" button on the extension page
+3. Open another unknown site under the `.github.io` domain (_without_ trailing dot), for example `https://square.github.io/`\
+   :mag: The site should be blocked\
+   :mag: The extension page should show the complete `square.github.io` domain
+4. Click the "Open" button on the extension page
+5. Open another unknown site under the `.github.io` domain (with trailing dot), for example `https://microsoft.github.io./`\
+   :mag: The site should be blocked\
+   :mag: The extension page should show the complete `microsoft.github.io.` domain (with trailing dot)
+6. Open the same unknown site, this time _without_ trailing dot, for example `https://microsoft.github.io/`\
+   :mag: The site should be blocked\
+   :mag: The extension page should show the complete `microsoft.github.io` domain
+
 ### IPv4 address
 
 1. Try to open `http://127.0.0.0`\

@@ -311,6 +311,16 @@ function parseDomain(
     return hostname
   }
 
+  // For trailing dot don't rely on PSL, just return the domain as is to be on the safe side
+  // Trailing dot is rather uncommon, so it is ok to treat every subdomain as being distinct
+  // See related https://github.com/lupomontero/psl/issues/350
+  // See also https://webmasters.stackexchange.com/q/73934
+  if (hostname.endsWith('.')) {
+    // Log warning because domain with trailing dot is rather uncommon, so this might be an attempted attack
+    console.warn(`Domain has trailing dot: ${hostname}`)
+    return hostname
+  }
+
   const pslDomain = psl.get(hostname)
 
   if (pslDomain === null) {
