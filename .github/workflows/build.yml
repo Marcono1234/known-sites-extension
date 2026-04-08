@@ -39,4 +39,6 @@ jobs:
         with:
           name: web-extension
           path: ./web-ext-artifacts/known_sites*.zip
+          # Don't wrap extension ZIP file in another ZIP file
+          archive: false
           if-no-files-found: error
