@@ -28,5 +28,14 @@
     "tabWidth": 2,
     "semi": false,
     "singleQuote": true
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24"
+    },
+    "packageManager": {
+      "name": "npm"
+    }
   }
 }
