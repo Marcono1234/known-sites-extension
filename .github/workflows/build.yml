@@ -37,7 +37,6 @@ jobs:
         # Only upload artifact if workflow was manually triggered
         if: github.event_name == 'workflow_dispatch'
         with:
-          name: web-extension
           path: ./web-ext-artifacts/known_sites*.zip
           # Don't wrap extension ZIP file in another ZIP file
           archive: false
