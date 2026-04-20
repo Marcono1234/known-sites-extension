@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "out",
     "rootDirs": [".", "../common-src"],
-    "typeRoots": ["../../node_modules/@types"]
+    "typeRoots": ["../../node_modules/@types"],
+    "types": ["firefox-webext-browser"]
   },
   "include": ["src", "../common-src"]
 }

@@ -8,7 +8,13 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: {
+          loader: 'ts-loader',
+          options: {
+            // Print used TypeScript version for easier troubleshooting
+            logLevel: 'info',
+          },
+        },
       },
     ],
   },

@@ -3,7 +3,10 @@
   "compilerOptions": {
     "outDir": "out",
     "rootDirs": [".", "../common-src"],
-    "typeRoots": ["../../node_modules/@types"]
+    "typeRoots": ["../../node_modules/@types"],
+    "types": ["firefox-webext-browser"],
+    // `skipLibCheck` because 'lru-cache' package refers to NodeJS types
+    "skipLibCheck": true
   },
   "include": ["src", "../common-src"]
 }
