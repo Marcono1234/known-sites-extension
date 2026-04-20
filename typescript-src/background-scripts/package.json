@@ -5,7 +5,7 @@
     "build": "webpack"
   },
   "dependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "psl": "^1.15.0",
     "lru-cache": "^11.2.6",
     "punycode": "^2.3.1",
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "webpack": "^5.105.2",
-    "webpack-cli": "^6.0.1",
+    "webpack-cli": "^7.0.2",
     "ts-loader": "^9.5.4"
   }
 }
