@@ -89,7 +89,8 @@ It is recommended to use [Visual Studio Code](https://code.visualstudio.com/) fo
 
 ## Testing
 
-For manual testing instructions, see [Manual testing](Manual%20testing.md).
+- [Manual testing instructions](./Manual%20testing.md)
+- [Automated integration tests](./integration-tests/)
 
 ## Building
 

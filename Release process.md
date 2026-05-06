@@ -5,14 +5,16 @@
 > on release you don't have to go in detail through all commits again.
 
 1. Update the `version` number in the [`manifest.json` file](./extension/manifest.json)
-2. Perform the tests described in the [Manual Testing guide](./Manual%20testing.md)
-3. Git commit the changes _to a separate branch_ and push them
-4. Manually run the ["Build extension" GitHub workflow](https://github.com/Marcono1234/known-sites-extension/actions/workflows/build.yml)\
+2. Run the [integration tests](./integration-tests/)
+3. Perform the tests described in the [Manual Testing guide](./Manual%20testing.md)\
+   (for cases not covered by the integration tests, and to ensure the extension really looks and acts as expected)
+4. Git commit the changes _to a separate branch_ and push them
+5. Manually run the ["Build extension" GitHub workflow](https://github.com/Marcono1234/known-sites-extension/actions/workflows/build.yml)\
    **Important:** Make sure to select the correct Git branch.
-5. Download the extension from the workflow run
-6. Verify that it is identical to the one you built locally (to make sure the build is reproducible)\
+6. Download the extension from the workflow run
+7. Verify that it is identical to the one you built locally (to make sure the build is reproducible)\
    **Note:** There might be differences in line endings when building on Windows locally, and [ZIP metadata might differ](https://github.com/mozilla/web-ext/issues/2381).
-7. Submit the new extension version at the [Mozilla Add-on Developer Hub](https://addons.mozilla.org/en-US/developers/addons)
+8. Submit the new extension version at the [Mozilla Add-on Developer Hub](https://addons.mozilla.org/en-US/developers/addons)
 
 ## After submission approval
 

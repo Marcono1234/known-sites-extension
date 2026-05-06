@@ -1,0 +1,164 @@
+import { expect, browser } from '@wdio/globals'
+import { describe } from 'mocha'
+
+import { blockedPage } from '../src/test-helper.ts'
+
+// Delegates to the test helper function, but has reordered parameters because most tests here
+// use the default `button` value (and would have to redundantly specify it all the time otherwise)
+async function expectBlockedPage(
+  domainText: string,
+  nonAsciiDomainPieces:
+    | blockedPage.DisplayedDomainPiece[]
+    | undefined = undefined,
+  nonAsciiToggled: boolean = false,
+  button: 'close' | 'back' = 'close',
+) {
+  await blockedPage.expectBlockedPage(
+    domainText,
+    button,
+    nonAsciiDomainPieces,
+    nonAsciiToggled,
+  )
+}
+
+describe('non-ASCII', () => {
+  it('display, prefix', async () => {
+    await browser.url('https://ä-display.invalid')
+    await expectBlockedPage('?-display.invalid', [
+      { type: 'highlighted', s: '?' },
+      { type: 'literal', s: '-display.invalid' },
+    ])
+  })
+
+  it('display, suffix', async () => {
+    await browser.url('https://display-ä.invalid')
+    await expectBlockedPage('display-?.invalid', [
+      { type: 'literal', s: 'display-' },
+      { type: 'highlighted', s: '?' },
+      { type: 'literal', s: '.invalid' },
+    ])
+  })
+
+  it('display, middle', async () => {
+    await browser.url('https://display-ä-middle.invalid')
+    await expectBlockedPage('display-?-middle.invalid', [
+      { type: 'literal', s: 'display-' },
+      { type: 'highlighted', s: '?' },
+      { type: 'literal', s: '-middle.invalid' },
+    ])
+  })
+
+  it('display, multiple', async () => {
+    await browser.url('https://ä-display-öü-multiple-äüö-aäuüoö.invalid')
+    await expectBlockedPage('?-display-??-multiple-???-a?u?o?.invalid', [
+      { type: 'highlighted', s: '?' },
+      { type: 'literal', s: '-display-' },
+      { type: 'highlighted', s: '??' },
+      { type: 'literal', s: '-multiple-' },
+      { type: 'highlighted', s: '???' },
+      { type: 'literal', s: '-a' },
+      { type: 'highlighted', s: '?' },
+      { type: 'literal', s: 'u' },
+      { type: 'highlighted', s: '?' },
+      { type: 'literal', s: 'o' },
+      { type: 'highlighted', s: '?' },
+      { type: 'literal', s: '.invalid' },
+    ])
+  })
+
+  it('punycode', async () => {
+    // domain 'punycode-ä.invalid'
+    await browser.url('xn--punycode--32a.invalid')
+    await expectBlockedPage('punycode-?.invalid', [
+      { type: 'literal', s: 'punycode-' },
+      { type: 'highlighted', s: '?' },
+      { type: 'literal', s: '.invalid' },
+    ])
+  })
+
+  it('functionality', async () => {
+    await browser.url('https://open-first-ä-other-öü.invalid')
+    await expectBlockedPage('open-first-?-other-??.invalid', [
+      { type: 'literal', s: 'open-first-' },
+      { type: 'highlighted', s: '?' },
+      { type: 'literal', s: '-other-' },
+      { type: 'highlighted', s: '??' },
+      { type: 'literal', s: '.invalid' },
+    ])
+
+    await blockedPage.checkboxLabelToggleAscii().click()
+    // Domain in tab title should still have '?', but domain displayed on page will show the non-ASCII chars
+    await expectBlockedPage(
+      'open-first-?-other-??.invalid',
+      [
+        { type: 'literal', s: 'open-first-' },
+        { type: 'highlighted', s: 'ä' },
+        { type: 'literal', s: '-other-' },
+        { type: 'highlighted', s: 'öü' },
+        { type: 'literal', s: '.invalid' },
+      ],
+      true, // checkbox should be selected now
+    )
+
+    // Disable non-ASCII chars again
+    await blockedPage.checkboxLabelToggleAscii().click()
+    await expectBlockedPage(
+      'open-first-?-other-??.invalid',
+      [
+        { type: 'literal', s: 'open-first-' },
+        { type: 'highlighted', s: '?' },
+        { type: 'literal', s: '-other-' },
+        { type: 'highlighted', s: '??' },
+        { type: 'literal', s: '.invalid' },
+      ],
+      false, // checkbox should be unselected again
+    )
+
+    // Enable non-ASCII chars again
+    await blockedPage.checkboxLabelToggleAscii().click()
+    // Domain in tab title should still have '?', but domain displayed on page will show the non-ASCII chars
+    await expectBlockedPage(
+      'open-first-?-other-??.invalid',
+      [
+        { type: 'literal', s: 'open-first-' },
+        { type: 'highlighted', s: 'ä' },
+        { type: 'literal', s: '-other-' },
+        { type: 'highlighted', s: 'öü' },
+        { type: 'literal', s: '.invalid' },
+      ],
+      true, // checkbox should be selected again
+    )
+
+    await blockedPage.buttonOpen().click()
+    await expect(browser).toHaveUrl(
+      // Browser apparently reports URL in punycode encoding
+      'https://xn--open-first--other--vtb18age.invalid/',
+    )
+
+    // Domain should not be blocked anymore
+    await browser.url('https://open-first-ä-other-öü.invalid')
+    await expect(browser).toHaveUrl(
+      // Browser apparently reports URL in punycode encoding
+      'https://xn--open-first--other--vtb18age.invalid/',
+    )
+
+    // Try opening other domain, this time without toggling non-ASCII before opening
+    await browser.url('https://open-second-äöü.invalid')
+    await expectBlockedPage(
+      'open-second-???.invalid',
+      [
+        { type: 'literal', s: 'open-second-' },
+        { type: 'highlighted', s: '???' },
+        { type: 'literal', s: '.invalid' },
+      ],
+      false, // checkbox should be unselected again
+      'back',
+    )
+
+    await blockedPage.buttonOpen().click()
+    await expect(browser).toHaveUrl(
+      // Browser apparently reports URL in punycode encoding
+      'https://xn--open-second--rcb6w8c.invalid/',
+    )
+  })
+})

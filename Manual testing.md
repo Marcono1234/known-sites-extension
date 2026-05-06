@@ -1,5 +1,9 @@
 # Manual testing
 
+> [!NOTE]
+> Many of these tests are also covered by the [automated integration tests](./integration-tests/).
+> Tests which are not covered or which should be run manually regardlessly are marked with a ❗ here.
+
 The following manual tests can be performed to verify that the extension works correctly. It is recommended to
 perform them with a fresh browser profile, for example by starting the browser using `web-ext run` (see `package.json`
 scripts), to get consistent behavior. Make sure that you performed a build (`npm run package`) after your last changes.
@@ -31,7 +35,7 @@ _KNOWN_SITES_DEBUG = true
 
 ## Tests
 
-### Browser action icon
+### Browser action icon (❗)
 
 :information_source: Does not work for Chrome
 
@@ -40,7 +44,7 @@ _KNOWN_SITES_DEBUG = true
 2. Deactivate the extension\
    :mag: The browser navbar should not show the extension logo
 
-### Open blocked
+### Open blocked (❗)
 
 1. Open an unknown site, for example `example.com`\
    :mag: The site should be blocked\
@@ -63,9 +67,9 @@ _KNOWN_SITES_DEBUG = true
 2. Click the "Open" button of the extension page\
    :mag: The site should be opened, and the complete URL should have been preserved
 
-### Blocked non-ASCII domain
+### Blocked non-ASCII domain (❗)
 
-1. Open an unknown site with a non-ASCII domain, e.g. `testäötestü.com`\
+1. Open an unknown site with a non-ASCII domain, e.g. `testäötestü.invalid`\
    :mag: The site should be blocked\
    :mag: The extension page should inform the user that the domain contains non-ASCII characters\
    :mag: The domain should be shown in the title of the tab, with non-ASCII characters replaced with `?`\
@@ -95,7 +99,7 @@ _KNOWN_SITES_DEBUG = true
 2. Click the "Close tab" button of the extension page\
    :mag: The tab should be closed
 
-### Still blocked after no action
+### Still blocked after no action (❗)
 
 1. Open an unknown site, for example `example.com`\
    :mag: The site should be blocked
@@ -104,7 +108,7 @@ _KNOWN_SITES_DEBUG = true
 3. Without doing anything on that page, open a new tab and open the same unknown site (e.g. `example.com`) again\
    :mag: The site should be blocked
 
-### Still blocked after "Go back"
+### Still blocked after "Go back" (❗)
 
 1. In a tab which already has navigation history (for example Firefox's default `about:newtab`), open an unknown site, e.g. `example.com`\
    :mag: The site should be blocked
@@ -114,7 +118,7 @@ _KNOWN_SITES_DEBUG = true
 4. Open a new tab and open the same unknown site (e.g. `example.com`) again\
    :mag: The site should be blocked
 
-### Still blocked after "Close tab"
+### Still blocked after "Close tab" (❗)
 
 1. Open in a new tab an unknown site, for example by middle-clicking (or right-click and selecting "Open Link in New Tab") one of the websites recommended on Firefox's start page\
    :mag: The site should be blocked
@@ -124,7 +128,7 @@ _KNOWN_SITES_DEBUG = true
 4. Open a new tab and open the same unknown site again\
    :mag: The site should be blocked
 
-### Allowed after "Open"
+### Allowed after "Open" (❗)
 
 1. Open an unknown site, for example `example.com`\
    :mag: The site should be blocked
@@ -133,7 +137,7 @@ _KNOWN_SITES_DEBUG = true
 3. In a separate tab, open the site (e.g. `example.com`) again\
    :mag: The site should not be blocked
 
-### Allowed when in history
+### Allowed when in history (❗)
 
 1. Disable the extension
 2. Open an unknown site, for example `example.com`\
@@ -222,7 +226,8 @@ The exact behavior of the extension regarding this does not matter since such UR
 5. Open another unknown site under the `.github.io` domain (with trailing dot), for example `https://microsoft.github.io./`\
    :mag: The site should be blocked\
    :mag: The extension page should show the complete `microsoft.github.io.` domain (with trailing dot)
-6. Open the same unknown site, this time _without_ trailing dot, for example `https://microsoft.github.io/`\
+6. Click the "Open" button on the extension page
+7. Open the same unknown site, this time _without_ trailing dot, for example `https://microsoft.github.io/`\
    :mag: The site should be blocked\
    :mag: The extension page should show the complete `microsoft.github.io` domain
 
@@ -245,7 +250,7 @@ The exact behavior of the extension regarding this does not matter since such UR
    :mag: The site should be blocked\
    :mag: The extension page should show `[2001:4860:4860::8888]` as hostname
 
-### Extension logging
+### Extension logging (❗)
 
 1. Open the console of the extension background script, see the [Extension log](#extension-log) section (but don't enable debug logging yet)
 2. Open an unknown site, for example `example.com`\
@@ -264,7 +269,7 @@ The exact behavior of the extension regarding this does not matter since such UR
 9. Look at the console again\
    :mag: This time it should have logged verbose messages, saying for example that the domain was found in the cache
 
-### HTML injection
+### HTML injection (❗)
 
 1. Open an unknown site, for example `example.com`\
    :mag: The site should be blocked
@@ -290,7 +295,7 @@ The exact behavior of the extension regarding this does not matter since such UR
    :mag: This time the extension page should mention that non-ASCII characters were detected\
    Clicking on the eye icon should not cause any of the events described in step 3 either
 
-### Invalid token
+### Invalid token (❗)
 
 1. Open an unknown site, for example `example.com`\
    :mag: The site should be blocked
@@ -302,13 +307,13 @@ The exact behavior of the extension regarding this does not matter since such UR
 4. Repeat steps 2 & 3, this time completely removing the `token` parameter\
    :mag: The same behavior as in step 3 should be observable
 
-### Incognito / Private mode (Chrome)
+### Incognito / Private mode (Chrome) (❗)
 
 1. Open the extension settings and allow usage in Incognito windows
 2. Open a new Incognito window\
    :mag: A dialog should appear, telling the user that Incognito mode is not supported for this browser
 
-### Incognito / Private mode (Firefox)
+### Incognito / Private mode (Firefox) (❗)
 
 1. Open the extension settings and allow usage in Private windows
 2. In a non-private window open `example.com` (clicking the "Open" button of the extension, if necessary)

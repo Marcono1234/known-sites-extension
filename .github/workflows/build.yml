@@ -23,6 +23,8 @@ jobs:
           # Read version from `devEngines` entry
           node-version-file: 'package.json'
           cache: 'npm'
+          # Explicitly specify path to also cover nested 'package-lock.json' for integration-tests
+          cache-dependency-path: '**/package-lock.json'
       - name: Install dependencies
         run: npm clean-install
       - name: Lint
@@ -42,3 +44,16 @@ jobs:
           # Don't wrap extension ZIP file in another ZIP file
           archive: false
           if-no-files-found: error
+
+      # Run integration tests after having uploaded extension artifact, to allow inspecting it
+      # in case of test failures
+      # These steps are run in the same workflow job to access the previously built extension artifact
+      - name: Install integration tests dependencies
+        working-directory: ./integration-tests
+        run: npm clean-install
+      - name: Lint integration tests
+        working-directory: ./integration-tests
+        run: npm run lint
+      - name: Run integration tests
+        working-directory: ./integration-tests
+        run: npm run wdio

@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
+    "target": "es2022",
+    "lib": [
+      "es2022",
+      "ESNext.Array", // for `Array.fromAsync` usage
+      "dom"
+    ],
+    "types": [
+      "node",
+      "@wdio/globals/types",
+      "expect-webdriverio",
+      "@wdio/mocha-framework"
+    ],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["wdio.conf.ts", "services", "src", "specs"]
+}
