@@ -5,12 +5,12 @@
     "build": "webpack"
   },
   "dependencies": {
-    "typescript": "6.0.2",
+    "typescript": "6.0.3",
     "@types/firefox-webext-browser": "143.0.0"
   },
   "devDependencies": {
-    "webpack": "5.105.4",
+    "webpack": "5.106.2",
     "webpack-cli": "7.0.2",
-    "ts-loader": "9.5.4"
+    "ts-loader": "9.5.7"
   }
 }
