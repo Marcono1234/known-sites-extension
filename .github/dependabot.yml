@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: 'monthly'
+      interval: 'semiannually'
     cooldown:
       default-days: 14
     groups:
@@ -17,7 +17,7 @@ updates:
     directories:
       - '**/*'
     schedule:
-      interval: 'monthly'
+      interval: 'semiannually'
     cooldown:
       default-days: 14
     groups:
