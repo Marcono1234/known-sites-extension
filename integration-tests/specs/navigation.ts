@@ -36,8 +36,8 @@ describe('navigation', () => {
     const originalWindowHandle = await browser.getWindowHandle()
     const originalWindowCount = (await browser.getWindowHandles()).length
     // Create a new tab, to avoid closing window when all tabs are closed
-    const tabHandle = (await browser.newWindow('about:blank', { type: 'tab' }))
-      .handle
+    const tabHandle = (await browser.createWindow('tab')).handle
+    await browser.switchToWindow(tabHandle)
     let windowHandles = await browser.getWindowHandles()
     expect(windowHandles.length).toBe(originalWindowCount + 1)
     expect(windowHandles).toContain(tabHandle)

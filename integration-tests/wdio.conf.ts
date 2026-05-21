@@ -31,9 +31,9 @@ async function enableExtensionForPrivateMode() {
   // Note: Select child `div` here because `addon-card` itself is apparently not clickable?
   await $(`addon-card[addon-id="${addonId}"] div:first-child`).click()
   // Allow running in private mode
-  await $(`addon-card[addon-id="${addonId}"]`)
-    .$('span[data-l10n-id="addon-detail-private-browsing-allow"]')
-    .click()
+  await $(
+    `addon-card[addon-id="${addonId}"] span[data-l10n-id="addon-detail-private-browsing-allow"]`,
+  ).click()
 
   // Set up new tab to not affect extension navigation
   await setUpNewTab()
