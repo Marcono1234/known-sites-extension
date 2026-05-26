@@ -45,6 +45,24 @@ h1 {
   text-align: center;
 }
 
+kbd {
+  /* Based on examples from https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/kbd */
+  border-radius: 3px;
+  padding: 1px 2px 0;
+  border: 1px solid;
+  font-family: monospace;
+  /* Slightly increase size because monospaced text is not as tall as regular text */
+  font-size: 1.1em;
+  /* Overwrite italic font style of enclosing element */
+  font-style: normal;
+}
+
+.open-incognito-hint {
+  font-style: italic;
+  font-size: 0.95em;
+  color: #5f5f5f;
+}
+
 .warning-text {
   text-align: justify;
 }
@@ -110,10 +128,6 @@ button:active {
 }
 #open-button:hover {
   background-color: var(--warn-color-hover);
-}
-
-.hidden {
-  display: none;
 }
 
 .eye-icon-in-text {

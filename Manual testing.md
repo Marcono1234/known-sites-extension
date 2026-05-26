@@ -330,3 +330,22 @@ The exact behavior of the extension regarding this does not matter since such UR
 8. Close all private windows
 9. In a new private window, open `github.com` again\
    :mag: The site should be blocked again
+
+### Open in Incognito / Private mode (Firefox) (❗)
+
+1. Open the extension settings and allow usage in Private windows
+2. In a non-private window open the unknown site `example.com`\
+   :mag: The blocked page should show a hint, saying that by holding <kbd>Alt</kbd> the site will be opened in a private window
+3. Hold the <kbd>Alt</kbd> keyboard key and click the "Open" button of the extension\
+   :mag: The site should have been opened in a new private window\
+   :mag: In the non-private window the blocked page should have been closed (navigated back respectively tab should have been closed)
+4. In the non-private window try to open `example.com` again\
+   :mag: It should still be blocked
+
+### Open in Incognito / Private mode; unavailable (Firefox) (❗)
+
+1. Open the extension settings and _disallow_ usage in Private windows
+2. In a non-private window open the unknown site `example.com`\
+   :mag: The blocked page should _not_ show a hint, saying that the site can be opened in a private window
+3. Hold the <kbd>Alt</kbd> keyboard key and click the "Open" button of the extension\
+   :mag: An error dialog should be shown, saying that the site cannot be opened in a private window

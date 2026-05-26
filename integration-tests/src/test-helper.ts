@@ -12,12 +12,19 @@ import { expect, browser } from '@wdio/globals'
 export async function runAsExtension<T>(f: () => Promise<T>): Promise<T> {
   // Open an arbitrary URL which will be blocked by the extension
   // Do this in a separate temporary tab to not affect navigation behavior of the current tab
-  // Note: Apparently cannot directly pass in dummy URL to `newWindow`; webdriver does not wait for page to be loaded then?
-  //   Therefore do this in separate steps
-  await browser.newWindow('about:blank', { type: 'tab' })
-  await browser.url('https://invalid.invalid')
+  const oldHandle = await browser.getWindowHandle()
+  // Note: Use `createWindow` instead of `newWindow(url, ...)` here because the latter fails with NS_BINDING_ABORTED,
+  //   maybe due to mocking of requests?
+  const tabHandle = (await browser.createWindow('tab')).handle
+  await browser.switchToWindow(tabHandle)
+  await browser.url('https://run-as-extension.invalid')
   const result = await f()
+  // Switch back to tab before calling `closeWindow()`, in case executing the function created a new tab / window
+  await browser.switchToWindow(tabHandle)
   await browser.closeWindow()
+  // Switch back to previous window; it seems `closeWindow()` might otherwise focus initial window instead
+  // of last focused one
+  await browser.switchToWindow(oldHandle)
   return result
 }
 
@@ -54,6 +61,10 @@ export namespace translations {
     buttonBack: string
     buttonCloseTab: string
 
+    hintIncognito: string
+    hintIncognitoHtml: string
+
+    errorCannotOpenIncognito: string
     /** Error message for incorrect token */
     errorIncorrectToken: string
   }
@@ -95,6 +106,12 @@ export namespace translations {
     buttonBack: 'Go back',
     buttonCloseTab: 'Close tab',
 
+    hintIncognito:
+      "Hint: Hold the Alt key while clicking the 'Open' button to open the website in a new Incognito / Private window.",
+    hintIncognitoHtml:
+      "Hint: Hold the <kbd>Alt</kbd> key while clicking the 'Open' button to open the website in a new Incognito / Private window.",
+
+    errorCannotOpenIncognito: 'Incognito / Private window cannot be opened',
     errorIncorrectToken: 'Action failed. (incorrect token)',
   }
 }
@@ -140,12 +157,19 @@ export namespace blockedPage {
     )
   }
 
-  /** Performs assertions on the blocked page */
+  /**
+   * Performs assertions on the blocked page
+   *
+   * @param revertButton behavior of the 'revert' button
+   * @param nonAsciiDomainPieces `null` if ASCII-only domain
+   * @param incognitoHintShown `undefined` if it does not matter for the test
+   */
   export async function expectBlockedPage(
     domainText: string,
-    button: 'close' | 'back' = 'close',
-    nonAsciiDomainPieces: DisplayedDomainPiece[] | undefined = undefined,
+    revertButton: 'close' | 'back' = 'close',
+    nonAsciiDomainPieces: DisplayedDomainPiece[] | null = null,
     nonAsciiToggled: boolean = false,
+    incognitoHintShown: boolean | undefined = undefined,
   ) {
     await expectBlockedPageUrl()
 
@@ -166,7 +190,7 @@ export namespace blockedPage {
 
     const displayedDomain = displayedDomainElement()
     await expect(displayedDomain).toHaveText(
-      nonAsciiDomainPieces === undefined
+      nonAsciiDomainPieces === null
         ? domainText
         : nonAsciiDomainPieces.map((p) => p.s).join(''),
     )
@@ -178,7 +202,7 @@ export namespace blockedPage {
 
     const elementsNonAscii = $$('.non-ascii-domain')
 
-    if (nonAsciiDomainPieces === undefined) {
+    if (nonAsciiDomainPieces === null) {
       await elementsNonAscii.forEach(
         async (e) => await expect(e).not.toBeDisplayed(),
       )
@@ -220,8 +244,21 @@ export namespace blockedPage {
     const buttonRevert_ = buttonRevert()
     await expect(buttonRevert_).toBeClickable()
     await expect(buttonRevert_).toHaveText(
-      button === 'back' ? en.buttonBack : en.buttonCloseTab,
+      revertButton === 'back' ? en.buttonBack : en.buttonCloseTab,
     )
+
+    if (incognitoHintShown !== undefined) {
+      const incognitoHint = $(
+        'p[data-i18n-formatted="blocked_hint_open_incognito"]',
+      )
+      if (incognitoHintShown) {
+        await expect(incognitoHint).toBeDisplayedInViewport()
+        await expect(incognitoHint).toHaveText(en.hintIncognito)
+        await expectInnerHtml(incognitoHint, en.hintIncognitoHtml)
+      } else {
+        await expect(incognitoHint).not.toBeDisplayed()
+      }
+    }
   }
 
   async function expectDisplayedDomainHtml(

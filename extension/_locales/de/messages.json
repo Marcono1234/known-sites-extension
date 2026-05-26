@@ -74,7 +74,13 @@
   "blocked_button_close_tab": {
     "message": "Tab schließen"
   },
+  "blocked_hint_open_incognito": {
+    "message": "Tipp: Halte die @ALT-KEY@ Taste während du auf den 'Öffnen' Knopf klickst um die Webseite in einem neuen Inkognito / Privatem Fenster zu öffnen."
+  },
 
+  "blocked_cannot_open_incognito": {
+    "message": "Inkognito / Privates Fenster kann nicht geöffnet werden"
+  },
   "blocked_action_failed_error": {
     "message": "Aktion ist fehlgeschlagen. (Fehler)"
   },

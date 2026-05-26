@@ -37,4 +37,5 @@ This means:
 - Unless testing functionality of the Public Suffix List, use dummy domains with the [special-use TLD `.invalid`](https://en.wikipedia.org/wiki/.invalid)\
   (to ensure that if the test setup is broken and accidentally sends a real request to a website, it won't connect to real websites, and also to not be affected by their potential HTTP redirects)
 - Tests within the same spec file share state, as mentioned in the ["Implementation notes" section](#implementation-notes) above.
-  If a test is expected to modify state, e.g. by opening a blocked website and therefore the extension remembering it as 'known', make sure the used domains are unique and no other test within the spec uses the same domain.
+  - If a test is expected to modify state, e.g. by opening a blocked website and therefore the extension remembering it as 'known', make sure the used domains are unique and no other test within the spec uses the same domain.
+  - Tests within the same spec should close all additional tabs and windows they created, otherwise it might affect other tests in the spec.

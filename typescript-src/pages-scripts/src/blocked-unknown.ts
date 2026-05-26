@@ -47,6 +47,7 @@ function setI18nContent() {
         /@EYE-ICON@/g,
         `<img class="eye-icon-in-text" alt="${escapeHtml(eyeIconInTextAlt)}" />`,
       )
+      .replace(/@ALT-KEY@/g, '<kbd>Alt</kbd>')
     element.innerHTML = message
   })
   setI18nContent('title', (element, message) =>
@@ -169,22 +170,23 @@ function sendMessage(message: MessageData): Promise<void> {
 
 // Based on https://github.com/EFForg/https-everywhere/blob/579b8c59d078fd65d547a546b381c9ae45c61232/chromium/pages/cancel/ux.js
 document.addEventListener('DOMContentLoaded', () => {
-  const blockedPage = fromPageUrlParams(
+  const blockedPageParams = fromPageUrlParams(
     new URLSearchParams(window.location.search),
   )
 
   // To be safe, check token before using any of the URL parameters, since they could
   // be forged by a malicious website
-  const token = blockedPage.token
+  const token = blockedPageParams.token
   sendMessage({ action: 'check-token', token: token }).then(() =>
-    initializePage(blockedPage),
+    initializePage(blockedPageParams),
   )
 })
 
-function initializePage(blockedPage: ExtPageUrlParams) {
-  const blockedUrl = blockedPage.url
-  const blockedDomain = blockedPage.domain
-  const token = blockedPage.token
+function initializePage(blockedPageParams: ExtPageUrlParams) {
+  const blockedUrl = blockedPageParams.url
+  const blockedDomain = blockedPageParams.domain
+  const canOpenIncognito = blockedPageParams.canOpenIncognito
+  const token = blockedPageParams.token
 
   setI18nContent()
   // Replace non-ASCII chars in domain to avoid having it interfere with title, e.g. due to right-to-left override
@@ -192,24 +194,6 @@ function initializePage(blockedPage: ExtPageUrlParams) {
     'blocked_window_title',
     createAsciiOnlyDomainForTitle(blockedDomain),
   )
-
-  const openButton = document.getElementById('open-button')!
-  openButton.addEventListener('click', () => {
-    console.info('Sending message to open URL')
-
-    // Send message to let extension first add domain to cache and then open
-    // it (to avoid immediately blocking it again), and also to validate token
-    sendMessage({
-      action: 'open-url',
-      token: token,
-      data: {
-        url: blockedUrl,
-        // Use raw domain value to use what the browser originally provided; assuming that
-        // all APIs of the browser treat domain consistently
-        domain: blockedPage.rawDomain,
-      },
-    })
-  })
 
   let revertButtonText: string
   let revertButtonAction: () => void
@@ -235,6 +219,49 @@ function initializePage(blockedPage: ExtPageUrlParams) {
   revertButton.textContent = revertButtonText
   revertButton.addEventListener('click', revertButtonAction)
 
+  const openButton = document.getElementById('open-button')!
+  openButton.addEventListener('click', (e) => {
+    // TODO: When activating button by focusing it and pressing Enter, `altKey` seems to always be false?
+    //   Not good for accessibility; would need a dedicated `keypress` listener for handling Enter?
+    //   But is overriding the default listener a good idea (that is, can users normally customize the key for activating a button?)?
+    const openIncognito = e.altKey
+
+    if (openIncognito && !canOpenIncognito) {
+      alert(browser.i18n.getMessage('blocked_cannot_open_incognito'))
+      return
+    }
+
+    console.info(`Sending message to open URL; openIncognito: ${openIncognito}`)
+
+    // Send message to let extension first add domain to cache and then open
+    // it (to avoid immediately blocking it again), and also to validate token
+    const messagePromise = sendMessage({
+      action: 'open-url',
+      token: token,
+      data: {
+        url: blockedUrl,
+        // Use raw domain value to use what the browser originally provided; assuming that
+        // all APIs of the browser treat domain consistently
+        domain: blockedPageParams.rawDomain,
+        openIncognito: openIncognito,
+      },
+    })
+
+    if (openIncognito) {
+      // Afterwards perform 'revert' action since URL was opened in new incognito window
+      messagePromise.then(() => revertButtonAction())
+    }
+  })
+
+  if (canOpenIncognito) {
+    for (const element of document.getElementsByClassName(
+      'open-incognito-hint',
+    )) {
+      // Show hint text
+      element.removeAttribute('hidden')
+    }
+  }
+
   const domainPlaceholder = document.getElementById('domain-placeholder')!
   const highlightedDomainHtmls = createHighlightedDomain(blockedDomain)
 
@@ -245,7 +272,7 @@ function initializePage(blockedPage: ExtPageUrlParams) {
     domainPlaceholder.innerHTML = highlightedDomainHtmls.asciiOnlyDomainHtml
     for (const element of document.getElementsByClassName('non-ascii-domain')) {
       // Show warning element
-      element.classList.remove('hidden')
+      element.removeAttribute('hidden')
     }
 
     const toggleCheckbox = document.getElementById(

@@ -84,7 +84,13 @@
     "message": "Close tab",
     "description": "Text of button for closing the tab."
   },
+  "blocked_hint_open_incognito": {
+    "message": "Hint: Hold the @ALT-KEY@ key while clicking the 'Open' button to open the website in a new Incognito / Private window."
+  },
 
+  "blocked_cannot_open_incognito": {
+    "message": "Incognito / Private window cannot be opened"
+  },
   "blocked_action_failed_error": {
     "message": "Action failed. (error)"
   },

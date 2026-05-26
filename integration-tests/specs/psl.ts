@@ -9,7 +9,7 @@ describe('public suffix list', () => {
     await blockedPage.expectBlockedPage('github.com')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('https://github.com/')
 
     await browser.url('https://docs.github.com')
@@ -25,7 +25,7 @@ describe('public suffix list', () => {
     await blockedPage.expectBlockedPage('google.com')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('https://www.google.com/')
 
     await browser.url('https://google.com')
@@ -37,7 +37,7 @@ describe('public suffix list', () => {
     await blockedPage.expectBlockedPage('google.co.uk')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('https://google.co.uk/')
 
     await browser.url('https://wikipedia.co.uk')
@@ -49,7 +49,7 @@ describe('public suffix list', () => {
     await blockedPage.expectBlockedPage('octocat.github.io')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('https://octocat.github.io/')
 
     await browser.url('https://google.github.io')
@@ -65,7 +65,7 @@ describe('public suffix list', () => {
     await blockedPage.expectBlockedPage('square.github.io')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('https://square.github.io/')
 
     // Try other domain with trailing dot; should not circumvent PSL
@@ -73,7 +73,7 @@ describe('public suffix list', () => {
     await blockedPage.expectBlockedPage('microsoft.github.io.', 'back')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('https://microsoft.github.io./')
 
     // To be safe, same domain but without trailing dot should still be blocked

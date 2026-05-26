@@ -4,13 +4,13 @@ import { pathToFileURL } from 'node:url'
 
 import { blockedPage } from '../src/test-helper.ts'
 
-describe('Blocked Page, basic', () => {
+describe('blocked page, basic', () => {
   it('block unknown page', async () => {
     await browser.url('https://example1.invalid')
     await blockedPage.expectBlockedPage('example1.invalid')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('https://example1.invalid/')
 
     // Should consider other domain still as unknown
@@ -28,7 +28,7 @@ describe('Blocked Page, basic', () => {
     await blockedPage.expectBlockedPage('sub-example.invalid')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('https://sub.sub-example.invalid/')
 
     // Other subdomain should not be blocked
@@ -54,7 +54,7 @@ describe('Blocked Page, basic', () => {
     await blockedPage.expectBlockedPage('path-example.invalid')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('https://path-example.invalid/first-path')
 
     // Same domain with other URL path should not be blocked
@@ -112,7 +112,7 @@ describe('Blocked Page, basic', () => {
     await blockedPage.expectBlockedPage('first.trailing-dot.invalid.')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('https://first.trailing-dot.invalid./')
 
     // Should consider same domain, but without trailing dot, as unknown
@@ -143,7 +143,7 @@ describe('Blocked Page, basic', () => {
     await blockedPage.expectBlockedPage('127.1.0.0')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('http://127.1.0.0/')
 
     // Should consider other IP address still as unknown
@@ -156,7 +156,7 @@ describe('Blocked Page, basic', () => {
     await blockedPage.expectBlockedPage('[::1]')
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl('http://[::1]/')
 
     // Should consider other IP address still as unknown

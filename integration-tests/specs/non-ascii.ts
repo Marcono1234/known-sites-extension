@@ -4,18 +4,16 @@ import { describe } from 'mocha'
 import { blockedPage } from '../src/test-helper.ts'
 
 // Delegates to the test helper function, but has reordered parameters because most tests here
-// use the default `button` value (and would have to redundantly specify it all the time otherwise)
+// use the default `revertButton` value (and would have to redundantly specify it all the time otherwise)
 async function expectBlockedPage(
   domainText: string,
-  nonAsciiDomainPieces:
-    | blockedPage.DisplayedDomainPiece[]
-    | undefined = undefined,
+  nonAsciiDomainPieces: blockedPage.DisplayedDomainPiece[] | null = null,
   nonAsciiToggled: boolean = false,
-  button: 'close' | 'back' = 'close',
+  revertButton: 'close' | 'back' = 'close',
 ) {
   await blockedPage.expectBlockedPage(
     domainText,
-    button,
+    revertButton,
     nonAsciiDomainPieces,
     nonAsciiToggled,
   )

@@ -123,19 +123,6 @@ browser.windows.onCreated.addListener(async (newWindow) => {
     // but at least in Chrome (where this message is shown) `alert` works
     alert(browser.i18n.getMessage('browser_incognito_unsupported'))
   }
-  if (isIncognito) {
-    const hasOtherIncognitoWindows = (
-      await browser.windows.getAll({ populate: false })
-    ).some((window) => window.incognito && window.id !== newWindow.id)
-
-    if (!hasOtherIncognitoWindows) {
-      // Acts as fallback in case cache was not cleared properly after last incognito window was closed
-      logDebug(
-        'Detected first opened incognito window; clearing previous incognito cache',
-      )
-      incognitoKnownDomainsCache.clear()
-    }
-  }
 })
 browser.windows.onRemoved.addListener(async (windowId) => {
   const hasIncognitoWindow = (
@@ -231,25 +218,47 @@ async function onOpenUrlMessage(
 ): Promise<MessageResponse> {
   const url = messageData.url
   const domain = messageData.domain
+  const openIncognito = messageData.openIncognito
   const isIncognito = (await browser.tabs.get(tabId)).incognito
 
-  ;(isIncognito ? incognitoKnownDomainsCache : knownDomainsCache).add(domain)
+  const cache =
+    // Use the incognito cache also when opening a new incognito window
+    // Note: Once this extension uses `incognito: split` this will not work anymore; the extension will
+    //   block the URL also in the new incognito window then, but that is probably acceptable
+    openIncognito || isIncognito
+      ? incognitoKnownDomainsCache
+      : knownDomainsCache
+  cache.add(domain)
 
-  const updateProperties: browser.tabs._UpdateUpdateProperties =
-    (await IS_FIREFOX)
-      ? {
-          // Replace the extension tab
-          loadReplace: true,
-          url: url,
-        }
-      : {
-          // Chrome does not support loadReplace, see https://github.com/mdn/browser-compat-data/issues/15412
-          url: url,
-        }
+  if (openIncognito && !isIncognito) {
+    await browser.windows
+      .create({
+        incognito: true,
+        url: url,
+      })
+      .catch((error) => {
+        console.error(
+          `Failed opening URL ${url} in new incognito window`,
+          error,
+        )
+      })
+  } else {
+    const updateProperties: browser.tabs._UpdateUpdateProperties =
+      (await IS_FIREFOX)
+        ? {
+            // Replace the extension tab
+            loadReplace: true,
+            url: url,
+          }
+        : {
+            // Chrome does not support loadReplace, see https://github.com/mdn/browser-compat-data/issues/15412
+            url: url,
+          }
 
-  browser.tabs.update(tabId, updateProperties).catch((error) => {
-    console.error(`Failed opening URL ${url}`, error)
-  })
+    browser.tabs.update(tabId, updateProperties).catch((error) => {
+      console.error(`Failed opening URL ${url}`, error)
+    })
+  }
   return 'success'
 }
 
@@ -480,7 +489,8 @@ async function isKnownSite(
 
   if (isKnown) {
     // Add domain to cache
-    ;(isIncognito ? incognitoKnownDomainsCache : knownDomainsCache).add(domain)
+    const cache = isIncognito ? incognitoKnownDomainsCache : knownDomainsCache
+    cache.add(domain)
     return true
   } else {
     return false
@@ -523,10 +533,15 @@ async function handleRequest(
     return {}
   } else {
     logDebug(`Blocking unknown domain ${rawDomain}`)
+    // Only offer opening in incognito mode if not already in incognito window, and if extension is
+    // actually enabled in incognito mode (otherwise further unknown sites there would not be detected)
+    const canOpenIncognito =
+      !isIncognito && (await browser.extension.isAllowedIncognitoAccess())
     const urlParams = toPageUrlParamsString({
       url: url,
       domain: nonPunycodeDomain,
       rawDomain: rawDomain,
+      canOpenIncognito: canOpenIncognito,
       token: TOKEN,
     })
     const blockingPageUrl = browser.runtime.getURL(

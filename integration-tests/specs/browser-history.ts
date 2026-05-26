@@ -128,7 +128,7 @@ describe('browser history', () => {
     }
 
     await blockedPage.buttonOpen().click()
-    // Should have opened blocked page
+    // Should have opened blocked URL
     await expect(browser).toHaveUrl(`https://${domain}/`)
 
     historyEntries = await getHistoryEntries(domain)

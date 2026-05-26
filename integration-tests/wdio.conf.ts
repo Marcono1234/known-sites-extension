@@ -66,9 +66,11 @@ async function installExtension(capabilities: WebdriverIO.Capabilities) {
  */
 async function setUpNewTab() {
   const oldWindow = await browser.getWindowHandle()
-  await browser.createWindow('tab')
+  const tabHandle = (await browser.createWindow('tab')).handle
   await browser.switchToWindow(oldWindow)
   await browser.closeWindow()
+  // Make sure new tab gets focus, in case `closeWindow()` somehow focused another window
+  await browser.switchToWindow(tabHandle)
 }
 
 const LOCALE_EN_US = 'en-US'
@@ -95,7 +97,6 @@ export const config: WebdriverIO.Config = {
     // Separate configuration which runs a subset of the tests in a Firefox Private mode window
     {
       browserName: 'firefox',
-
       'moz:firefoxOptions': {
         prefs: {
           // Explicitly specify locale to not be affected by browser default locale / OS locale
@@ -156,7 +157,34 @@ export const config: WebdriverIO.Config = {
     await installExtension(capabilities as WebdriverIO.Capabilities)
   },
 
-  afterTest: async () => {
+  beforeTest: async (_test, context) => {
+    // TODO: Is this the intended use case for `context`?
+    context['known-window-handles'] = await browser.getWindowHandles()
+  },
+  afterTest: async (test, context) => {
+    // To be safe close all windows which did not exist when the test started; even though the
+    // tests should do this themselves, if they fail then other tests might fail with confusing
+    // errors if there are still additional windows open
+    const knownWindowHandles = context['known-window-handles']
+    if (!Array.isArray(knownWindowHandles) || knownWindowHandles.length === 0) {
+      // There should always be at least one window handle; otherwise something with this test / cleanup setup is broken
+      throw new Error(`No known window handles: ${knownWindowHandles}`)
+    }
+
+    const handlesToClose = (await browser.getWindowHandles()).filter(
+      (h) => !knownWindowHandles.includes(h),
+    )
+    if (handlesToClose.length > 0) {
+      console.warn(
+        `Test '${test.parent}: ${test.title}' has ${handlesToClose.length} unclosed window handles; closing them`,
+      )
+
+      for (const handle of handlesToClose) {
+        await browser.switchToWindow(handle)
+        await browser.closeWindow()
+      }
+    }
+
     await setUpNewTab()
   },
 }
