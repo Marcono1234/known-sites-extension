@@ -10,13 +10,13 @@ async function addBookmarkEntry(
   await runAsExtension(async () => {
     await browser.execute(
       async (url, title) => {
-        if (title) {
-          // @ts-expect-error: does not know about web-extension types
-          browser.bookmarks.create({ url: url, title: title })
-        } else {
-          // @ts-expect-error: does not know about web-extension types
-          browser.bookmarks.create({ url: url })
+        const args = {
+          url,
+          title,
         }
+        // @ts-expect-error: does not know about web-extension types
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        await browser.bookmarks.create(args)
       },
       url,
       title,

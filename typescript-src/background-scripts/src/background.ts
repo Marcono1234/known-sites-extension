@@ -54,7 +54,7 @@ function logDebug(message: string, ...args: unknown[]) {
    * See also https://stackoverflow.com/q/79540106
    */
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const enabled = (window as any)._KNOWN_SITES_DEBUG
   if (enabled === true) {
     console.debug(message, ...args)
@@ -114,25 +114,37 @@ const knownDomainsCache = new LRUCacheSet<string>(200)
  */
 const incognitoKnownDomainsCache = new LRUCacheSet<string>(200)
 
-browser.windows.onCreated.addListener(async (newWindow) => {
-  const isIncognito = newWindow.incognito
-  if (isIncognito && !(await IS_FIREFOX)) {
-    // Note: This alert dialog is only shown when the user enabled the extension for incognito mode, otherwise
-    // the listener is not notified about the newly created incognito window (as desired)
-    // Note: `alert` might not work for all browsers, e.g. Firefox shows "alert() is not supported in background windows",
-    // but at least in Chrome (where this message is shown) `alert` works
-    alert(browser.i18n.getMessage('browser_incognito_unsupported'))
+browser.windows.onCreated.addListener((newWindow) => {
+  // Separate async handler because listener cannot be async?
+  const handler = async () => {
+    const isIncognito = newWindow.incognito
+    if (isIncognito && !(await IS_FIREFOX)) {
+      // Note: This alert dialog is only shown when the user enabled the extension for incognito mode, otherwise
+      // the listener is not notified about the newly created incognito window (as desired)
+      // Note: `alert` might not work for all browsers, e.g. Firefox shows "alert() is not supported in background windows",
+      // but at least in Chrome (where this message is shown) `alert` works
+      alert(browser.i18n.getMessage('browser_incognito_unsupported'))
+    }
   }
+  handler().catch((error) =>
+    console.error('Failed handling window creation event', error),
+  )
 })
-browser.windows.onRemoved.addListener(async (windowId) => {
-  const hasIncognitoWindow = (
-    await browser.windows.getAll({ populate: false })
-  ).some((window) => window.incognito && window.id !== windowId)
+browser.windows.onRemoved.addListener((windowId) => {
+  // Separate async handler because listener cannot be async?
+  const handler = async () => {
+    const hasIncognitoWindow = (
+      await browser.windows.getAll({ populate: false })
+    ).some((window) => window.incognito && window.id !== windowId)
 
-  if (!hasIncognitoWindow) {
-    logDebug('No incognito window is open anymore; clearing incognito cache')
-    incognitoKnownDomainsCache.clear()
+    if (!hasIncognitoWindow) {
+      logDebug('No incognito window is open anymore; clearing incognito cache')
+      incognitoKnownDomainsCache.clear()
+    }
   }
+  handler().catch((error) =>
+    console.error('Failed handling window removal event', error),
+  )
 })
 
 browser.webRequest.onBeforeRequest.addListener(
@@ -199,11 +211,10 @@ browser.runtime.onMessage.addListener(
     } else if (action === 'open-url') {
       return onOpenUrlMessage(tabId, message.data)
     } else if (action === 'close-tab') {
-      browser.tabs
-        .remove(tabId)
-        .catch((error) => console.error('Failed closing tab', error))
+      await browser.tabs.remove(tabId)
     } else {
       action satisfies never // ensure that if-else is exhaustive
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- permit `action` as `never` in template (in reality it would be a string)
       console.error(`Unknown message action: ${action}`, message, sender)
       return 'error'
     }
@@ -231,17 +242,10 @@ async function onOpenUrlMessage(
   cache.add(domain)
 
   if (openIncognito && !isIncognito) {
-    await browser.windows
-      .create({
-        incognito: true,
-        url: url,
-      })
-      .catch((error) => {
-        console.error(
-          `Failed opening URL ${url} in new incognito window`,
-          error,
-        )
-      })
+    await browser.windows.create({
+      incognito: true,
+      url: url,
+    })
   } else {
     const updateProperties: browser.tabs._UpdateUpdateProperties =
       (await IS_FIREFOX)
@@ -255,9 +259,7 @@ async function onOpenUrlMessage(
             url: url,
           }
 
-    browser.tabs.update(tabId, updateProperties).catch((error) => {
-      console.error(`Failed opening URL ${url}`, error)
-    })
+    await browser.tabs.update(tabId, updateProperties)
   }
   return 'success'
 }
@@ -284,8 +286,8 @@ function parseDomain(
   let parsedUrl: URL
   try {
     parsedUrl = new URL(url)
-  } catch (typeError) {
-    console.error(`Failed parsing URL ${url}`, typeError)
+  } catch (error) {
+    console.error(`Failed parsing URL ${url}`, error)
     // Fall back to using complete URL as domain
     return url
   }
@@ -354,8 +356,8 @@ function parseOrigin(url: string): string {
   let origin: string
   try {
     origin = new URL(url).origin
-  } catch (typeError) {
-    console.error(`Failed parsing URL ${url}`, typeError)
+  } catch (error) {
+    console.error(`Failed parsing URL ${url}`, error)
     // Fall back to using complete URL as origin
     return url
   }
@@ -521,8 +523,8 @@ async function handleRequest(
   let nonPunycodeDomain: string
   try {
     nonPunycodeDomain = punycode.toUnicode(rawDomain)
-  } catch (e) {
-    console.error(`Punycode conversion failed for domain ${rawDomain}`, e)
+  } catch (error) {
+    console.error(`Punycode conversion failed for domain ${rawDomain}`, error)
     // If conversion failed; domain might be malformed and handling of it might be
     // browser specific; to be safe cancel loading
     return { cancel: true }
@@ -552,13 +554,9 @@ async function handleRequest(
     // As (hacky?) workaround instead load the blocking page manually
     // Using `tabs.update` also has the advantage that the page can be loaded without having to be specified
     // in `web_accessible_resources` (which might otherwise increase the attack surface of the extension)
-    browser.tabs
-      .update(requestDetails.tabId, {
-        url: blockingPageUrl,
-      })
-      .catch((error) => {
-        console.error(`Failed opening blocking page ${blockingPageUrl}`, error)
-      })
+    await browser.tabs.update(requestDetails.tabId, {
+      url: blockingPageUrl,
+    })
 
     return {
       cancel: true,

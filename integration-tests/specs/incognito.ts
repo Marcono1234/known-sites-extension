@@ -14,7 +14,8 @@ async function assertIncognitoWindow() {
     async () =>
       await browser.execute(async () => {
         // @ts-expect-error: does not know about web-extension types
-        return (await browser.windows.getCurrent()).incognito
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        return (await browser.windows.getCurrent()).incognito as boolean
       }),
   )
   if (incognito !== true) {
@@ -32,6 +33,7 @@ async function openIncognitoWindow() {
   await runAsExtension(async () => {
     await browser.execute(async () => {
       // @ts-expect-error: does not know about web-extension types
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       await browser.windows.create({
         incognito: true,
       })
@@ -85,7 +87,7 @@ async function executeAndGetWindowHandles(
 
   const newHandles = await browser.getWindowHandles()
   if (newHandles.length !== oldHandles.length + 1) {
-    throw new Error(`unexpected handles: ${newHandles}`)
+    throw new Error(`unexpected handles: ${newHandles.toString()}`)
   }
 
   const newHandlesFiltered = newHandles.filter((h) => !oldHandles.includes(h))
@@ -93,7 +95,7 @@ async function executeAndGetWindowHandles(
   // (maybe one for window and one for tab?)
   if (newHandlesFiltered.length !== 1 && newHandlesFiltered.length !== 2) {
     throw new Error(
-      `unable to find new handle; filtered: ${newHandlesFiltered}; all: ${newHandles}`,
+      `unable to find new handle; filtered: ${newHandlesFiltered.toString()}; all: ${newHandles.toString()}`,
     )
   }
 
@@ -218,13 +220,18 @@ describe('incognito mode', () => {
 
     // Prepare handling of error dialog
     const dialogMessagePromise = new Promise((resolve, reject) =>
+      /* eslint-disable-next-line @typescript-eslint/no-misused-promises -- type declaration bug? https://github.com/webdriverio/webdriverio/issues/15276 */
       browser.on('dialog', async (dialog) => {
         const type = dialog.type()
         const message = dialog.message()
         if (type === 'alert') {
           resolve(message)
         } else {
-          reject(`unexpected dialog type: ${type}; with message '${message}'`)
+          reject(
+            new Error(
+              `unexpected dialog type: ${type}; with message '${message}'`,
+            ),
+          )
         }
         await dialog.dismiss()
       }),

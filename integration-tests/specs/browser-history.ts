@@ -10,13 +10,13 @@ async function addHistoryEntry(
   await runAsExtension(async () => {
     await browser.execute(
       async (url, title) => {
-        if (title) {
-          // @ts-expect-error: does not know about web-extension types
-          browser.history.addUrl({ url: url, title: title })
-        } else {
-          // @ts-expect-error: does not know about web-extension types
-          browser.history.addUrl({ url: url })
+        const args = {
+          url,
+          title,
         }
+        // @ts-expect-error: does not know about web-extension types
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        await browser.history.addUrl(args)
       },
       url,
       title,
@@ -28,6 +28,7 @@ async function removeHistoryEntry(url: string) {
   await runAsExtension(async () => {
     await browser.execute(async (url) => {
       // @ts-expect-error: does not know about web-extension types
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       await browser.history.deleteUrl({ url: url })
     }, url)
   })
@@ -38,10 +39,16 @@ async function getHistoryEntries(text: string): Promise<string[]> {
   return await runAsExtension(
     async () =>
       await browser.execute(async (text) => {
+        // Subset of https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/history/HistoryItem
+        type HistoryItem = {
+          url?: string
+        }
         // @ts-expect-error: does not know about web-extension types
-        const entries = await browser.history.search({ text: text })
-        // @ts-expect-error: does not know about web-extension types
-        return entries.map((e) => e.url)
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const entries = (await browser.history.search({
+          text: text,
+        })) as HistoryItem[]
+        return entries.map((e) => e.url).filter((url) => url !== undefined)
       }, text),
   )
 }
@@ -124,7 +131,9 @@ describe('browser history', () => {
     let historyEntries = await getHistoryEntries(domain)
     // Should not be contained in history
     if (historyEntries.length !== 0) {
-      throw new Error(`unexpected history entries: ${historyEntries}`)
+      throw new Error(
+        `unexpected history entries: ${historyEntries.toString()}`,
+      )
     }
 
     await blockedPage.buttonOpen().click()
@@ -134,7 +143,9 @@ describe('browser history', () => {
     historyEntries = await getHistoryEntries(domain)
     // History should contain URL now
     if (historyEntries.length !== 1 || !historyEntries.includes(url)) {
-      throw new Error(`unexpected history entries: ${historyEntries}`)
+      throw new Error(
+        `unexpected history entries: ${historyEntries.toString()}`,
+      )
     }
   })
 })

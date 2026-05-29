@@ -163,7 +163,9 @@ function sendMessage(message: MessageData): Promise<void> {
       )
     },
     (error) => {
-      console.error('Failed sending message', message, error)
+      throw new Error(`Failed sending message: ${JSON.stringify(message)}`, {
+        cause: error,
+      })
     },
   )
 }
@@ -177,9 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // To be safe, check token before using any of the URL parameters, since they could
   // be forged by a malicious website
   const token = blockedPageParams.token
-  sendMessage({ action: 'check-token', token: token }).then(() =>
-    initializePage(blockedPageParams),
-  )
+  sendMessage({ action: 'check-token', token: token })
+    .then(() => initializePage(blockedPageParams))
+    .catch((error) => console.error('Failed initializing page', error))
 })
 
 function initializePage(blockedPageParams: ExtPageUrlParams) {
@@ -211,7 +213,7 @@ function initializePage(blockedPageParams: ExtPageUrlParams) {
       sendMessage({
         action: 'close-tab',
         token: token,
-      })
+      }).catch((error) => console.error('Failed closing tab', error))
     }
   }
 
@@ -235,7 +237,7 @@ function initializePage(blockedPageParams: ExtPageUrlParams) {
 
     // Send message to let extension first add domain to cache and then open
     // it (to avoid immediately blocking it again), and also to validate token
-    const messagePromise = sendMessage({
+    let openUrlPromise = sendMessage({
       action: 'open-url',
       token: token,
       data: {
@@ -249,8 +251,9 @@ function initializePage(blockedPageParams: ExtPageUrlParams) {
 
     if (openIncognito) {
       // Afterwards perform 'revert' action since URL was opened in new incognito window
-      messagePromise.then(() => revertButtonAction())
+      openUrlPromise = openUrlPromise.then(() => revertButtonAction())
     }
+    openUrlPromise.catch((error) => console.error('Failed opening URL', error))
   })
 
   if (canOpenIncognito) {

@@ -18,13 +18,18 @@ describe('malicious blocked page URL', () => {
 
     // Prepare handling of error dialog
     const dialogMessagePromise = new Promise((resolve, reject) =>
+      /* eslint-disable-next-line @typescript-eslint/no-misused-promises -- type declaration bug? https://github.com/webdriverio/webdriverio/issues/15276 */
       browser.on('dialog', async (dialog) => {
         const type = dialog.type()
         const message = dialog.message()
         if (type === 'alert') {
           resolve(message)
         } else {
-          reject(`unexpected dialog type: ${type}; with message '${message}'`)
+          reject(
+            new Error(
+              `unexpected dialog type: ${type}; with message '${message}'`,
+            ),
+          )
         }
         await dialog.dismiss()
       }),
@@ -76,6 +81,7 @@ describe('malicious blocked page URL', () => {
     }
 
     let htmlInjectionMessage: string | null = null
+    /* eslint-disable-next-line @typescript-eslint/no-misused-promises -- type declaration bug? https://github.com/webdriverio/webdriverio/issues/15276 */
     browser.on('dialog', async (dialog) => {
       // Also specify a fallback message in case `message()` is for whatever reason null,
       // to still detect that dialog appeared

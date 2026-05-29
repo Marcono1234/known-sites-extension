@@ -15,7 +15,9 @@ async function getExtensionFilePath(): Promise<string> {
     }),
   )
   if (extensionsFiles.length !== 1) {
-    throw Error(`expected one extension file, found: ${extensionsFiles}`)
+    throw Error(
+      `expected one extension file, found: ${extensionsFiles.toString()}`,
+    )
   }
   return path.join(extensionsDir, extensionsFiles[0])
 }
@@ -159,12 +161,14 @@ export const config: WebdriverIO.Config = {
 
   beforeTest: async (_test, context) => {
     // TODO: Is this the intended use case for `context`?
+    /* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */
     context['known-window-handles'] = await browser.getWindowHandles()
   },
   afterTest: async (test, context) => {
     // To be safe close all windows which did not exist when the test started; even though the
     // tests should do this themselves, if they fail then other tests might fail with confusing
     // errors if there are still additional windows open
+    /* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
     const knownWindowHandles = context['known-window-handles']
     if (!Array.isArray(knownWindowHandles) || knownWindowHandles.length === 0) {
       // There should always be at least one window handle; otherwise something with this test / cleanup setup is broken
