@@ -41,13 +41,13 @@ function setI18nContent() {
   setI18nContent('', (element, message) => (element.textContent = message))
   setI18nContent('formatted', (element, message) => {
     message = escapeHtml(message)
-      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
-      .replace(/@NON-ASCII@/g, '<span class="non-ascii-char">?</span>')
-      .replace(
-        /@EYE-ICON@/g,
+      .replaceAll(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      .replaceAll('@NON-ASCII@', '<span class="non-ascii-char">?</span>')
+      .replaceAll(
+        '@EYE-ICON@',
         `<img class="eye-icon-in-text" alt="${escapeHtml(eyeIconInTextAlt)}" />`,
       )
-      .replace(/@ALT-KEY@/g, '<kbd>Alt</kbd>')
+      .replaceAll('@ALT-KEY@', '<kbd>Alt</kbd>')
     element.innerHTML = message
   })
   setI18nContent('title', (element, message) =>
@@ -64,11 +64,11 @@ function setI18nContent() {
 // From https://stackoverflow.com/a/6234804
 function escapeHtml(input: string): string {
   return input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
 }
 
 function isAscii(codepoint: number | undefined): boolean {

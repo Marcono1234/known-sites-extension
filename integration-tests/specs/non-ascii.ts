@@ -101,7 +101,7 @@ describe('non-ASCII', () => {
     await browser.url(`https://${domain}`)
 
     await expectBlockedPage(
-      domain.replace(/[äü]/g, '?'),
+      domain.replaceAll(/[äü]/g, '?'),
       [
         {
           type: 'highlighted',

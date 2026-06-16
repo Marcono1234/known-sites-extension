@@ -11,7 +11,7 @@ describe('malicious blocked page URL', () => {
     await blockedPage.expectBlockedPage('invalid.invalid')
     const url = await browser.getUrl()
     // Insert 'a' in front of token
-    const modifiedUrl = url.replace(/token=/, 'token=a')
+    const modifiedUrl = url.replace('token=', 'token=a')
     if (modifiedUrl === url) {
       throw new Error('failed to replace token')
     }
