@@ -231,6 +231,64 @@ The exact behavior of the extension regarding this does not matter since such UR
    :mag: The site should be blocked\
    :mag: The extension page should show the complete `microsoft.github.io` domain
 
+### Long domain (❗)
+
+1. Open an unknown site with a long domain, for example:
+   ```text
+   https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.invalid
+   ```
+   :mag: The site should be blocked\
+   :mag: The extension page should show the domain cut off on the _left_ side, with an ellipsis (`…`)\
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...bbbb.invalid"\
+   :mag: The title of the tab should show the domain cut off on the _left_; it should show "...bbbb.invalid"
+
+### Long domain non-ASCII (❗)
+
+1. Open an unknown site with a long non-ASCII domain, for example:
+   ```text
+   https://ääääääääääääääääääääääääääääääüüüüüüüüüüüüüüüüüüüüüüüüüüüüüü.invalid
+   ```
+   :mag: The site should be blocked\
+   :mag: Non-ASCII characters should be replaced with `?` and highlighted in red\
+   :mag: The extension page should show the domain cut off on the _left_ side, with an ellipsis (`…`)\
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...???.invalid"
+2. Click the eye icon on the extension page\
+   :mag: The domain should show the non-ASCII characters, highlighted in red\
+   :mag: The domain should still be cut off on the _left_\
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...üüü.invalid"
+
+### Long domain non-ASCII, mixed (❗)
+
+1. Open an unknown site with a long non-ASCII domain, for example:
+   ```text
+   https://aaääaaääaaääaaääaaääaaääaaääaaääaaääaaääaaääaaääaaääaaääaaää.invalid
+   ```
+   :mag: The site should be blocked\
+   :mag: Non-ASCII characters should be replaced with `?` and highlighted in red\
+   :mag: The extension page should show the domain cut off on the _left_ side, with an ellipsis (`…`)\
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...aa??.invalid"
+2. Click the eye icon on the extension page\
+   :mag: The domain should show the non-ASCII characters, highlighted in red\
+   :mag: The domain should still be cut off on the _left_\
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...aaää.invalid"
+
+### Long domain non-ASCII, right-to-left script (❗)
+
+1. Open an unknown site with a long non-ASCII right-to-left script domain, for example:
+   ```text
+   https://עִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִיתעִבְרִית.invalid
+   ```
+   :mag: The site should be blocked\
+   :mag: Non-ASCII characters should be replaced with `?` and highlighted in red\
+   :mag: The extension page should show the domain cut off on the _left_ side, with an ellipsis (`…`)\
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...???.invalid"
+2. Click the eye icon on the extension page\
+   :mag: The domain should show the non-ASCII characters, highlighted in red\
+   :mag: The domain should still be cut off on the _left_\
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should end with ".invalid"
+
+Note: The domain text might not be displayed in the expected right-to-left order; for now this is acceptable / desired.
+
 ### IPv4 address
 
 1. Try to open `http://127.0.0.0`\

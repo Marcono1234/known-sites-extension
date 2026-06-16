@@ -86,6 +86,13 @@ function createAsciiOnlyDomainForTitle(domain: string): string {
     }
   }
 
+  // Truncate on the left (i.e. the subdomains) if domain is too large and would prevent
+  // title from being readable
+  const limit = 30
+  if (asciiDomain.length > limit) {
+    asciiDomain = `…${asciiDomain.substring(asciiDomain.length - limit)}`
+  }
+
   return asciiDomain
 }
 

@@ -74,6 +74,27 @@ describe('blocked page, basic', () => {
     )
   })
 
+  it('long domain', async () => {
+    let domain = `${'a'.repeat(70)}.invalid`
+    await browser.url(`https://${domain}`)
+
+    await blockedPage.expectBlockedPage(domain)
+    const size1 = await blockedPage.displayedDomainElement().getSize()
+
+    domain = `${'a'.repeat(200)}.invalid`
+    await browser.url(`https://${domain}`)
+
+    await blockedPage.expectBlockedPage(domain, 'back')
+    const size2 = await blockedPage.displayedDomainElement().getSize()
+
+    // Verify that domain text was not wrapped into multiple lines
+    expect(size1.height).toBe(size2.height)
+
+    // Verify that domain text was truncated
+    // TODO: Does not work; apparently this is the non-truncated width
+    // expect(size1.width).toBe(size2.width)
+  })
+
   it('http: URI blocked', async () => {
     await browser.url('http://http-uri.invalid')
     await blockedPage.expectBlockedPage('http-uri.invalid')

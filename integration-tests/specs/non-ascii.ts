@@ -74,6 +74,57 @@ describe('non-ASCII', () => {
     ])
   })
 
+  it('long domain', async () => {
+    let domain = `${'abäü'.repeat(20)}.invalid`
+    await browser.url(`https://${domain}`)
+
+    // TODO: Ideally would also check `expectBlockedPage(...)`, but it seems webdriver's `toHaveText(...)` somehow drops
+    // the truncated `<span>` elements containing the highlighted '?', so instead of "ab??" repeated, the actual text
+    // is erroneously (?) something like "ababab...ab??ab??" (note the missing '?' at the beginning)
+    const size1 = await blockedPage.displayedDomainElement().getSize()
+
+    domain = `${'abäü'.repeat(50)}.invalid`
+    await browser.url(`https://${domain}`)
+
+    // TODO: Ideally would also check `expectBlockedPage(...)`, see TODO above
+    const size2 = await blockedPage.displayedDomainElement().getSize()
+
+    // Verify that domain text was not wrapped into multiple lines
+    expect(size1.height).toBe(size2.height)
+
+    // Verify that domain text was truncated
+    // TODO: Does not work; apparently this is the non-truncated width
+    // expect(size1.width).toBe(size2.width)
+
+    // Also check domain which is only non-ASCII, with no ASCII interspersed
+    domain = `${'äü'.repeat(50)}.invalid`
+    await browser.url(`https://${domain}`)
+
+    await expectBlockedPage(
+      domain.replace(/[äü]/g, '?'),
+      [
+        {
+          type: 'highlighted',
+          s: '?'.repeat(50 * 2),
+        },
+        {
+          type: 'literal',
+          s: '.invalid',
+        },
+      ],
+      false,
+      'back',
+    )
+    const size3 = await blockedPage.displayedDomainElement().getSize()
+
+    // Verify that domain text was not wrapped into multiple lines
+    expect(size1.height).toBe(size3.height)
+
+    // Verify that domain text was truncated
+    // TODO: Does not work; apparently this is the non-truncated width
+    // expect(size1.width).toBe(size3.width)
+  })
+
   it('functionality', async () => {
     await browser.url('https://open-first-ä-other-öü.invalid')
     await expectBlockedPage('open-first-?-other-??.invalid', [

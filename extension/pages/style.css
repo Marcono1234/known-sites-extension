@@ -14,6 +14,10 @@
 }
 
 main {
+  /*
+   * This max-width also implicitly limits the length of the displayed domain (long subdomains will be truncated,
+   * but the TLD will be shown), which is desired to avoid deceiving the user when the domain is too long.
+   */
   max-width: 40em;
   height: 70%;
   padding-top: 20px;
@@ -77,22 +81,43 @@ kbd {
   margin: 10px;
 }
 
-#domain-placeholder {
-  /** Prefer sans-serif monospace fonts */
-  font-family:
-    Consolas,
-    Noto Mono,
-    ui-monospace,
-    monospace;
-  font-size: 1.15em;
-  text-align: center;
-
+#domain-placeholder-enclosing {
   background-color: #f7f7f7;
   border-radius: 10px;
 
   display: inline-block;
   min-width: 40%;
   padding: 10px;
+
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  /*
+   * Truncate long domain, but on the left (the subdomains) instead of the right (the TLD)
+   * This requires setting `direction: rtl` on an enclosing element and then having the actual
+   * text in an inner element with the direction reverted, see https://stackoverflow.com/a/71864029
+   */
+  text-overflow: ellipsis;
+  direction: rtl;
+}
+
+#domain-placeholder {
+  /* Prefer sans-serif monospace fonts */
+  font-family:
+    Consolas,
+    Noto Mono,
+    ui-monospace,
+    monospace;
+  font-size: 1.15em;
+
+  /*
+   * Revert direction from `#domain-placeholder-enclosing` above again, to ensure that domain is
+   * truncated on the left (subdomains are truncated) and TLD is on the right (and fully visible).
+   * For ASCII-only domains reverting the direction might not make a difference, but for non-ASCII
+   * domains, especially with right-to-left scripts such as Arabic or Hebrew, this is needed.
+   */
+  direction: ltr;
+  unicode-bidi: bidi-override;
 }
 
 .button-bar {

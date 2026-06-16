@@ -174,7 +174,14 @@ export namespace blockedPage {
     await expectBlockedPageUrl()
 
     const en = translations.EN
-    await expect(browser).toHaveTitle(en.windowTitle(domainText))
+
+    const titleLimit = 30
+    const expectedTitleDomain =
+      domainText.length > titleLimit
+        ? `…${domainText.substring(domainText.length - titleLimit)}`
+        : domainText
+    await expect(browser).toHaveTitle(en.windowTitle(expectedTitleDomain))
+
     // TODO: Uses xPath selector `/...` here because CSS selector does not find `html` element
     //   on older Firefox versions, see https://github.com/webdriverio/webdriverio/issues/15233
     await expect($('/html')).toHaveAttribute('lang', en.htmlLang)
