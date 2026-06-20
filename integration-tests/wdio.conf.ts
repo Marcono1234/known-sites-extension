@@ -98,7 +98,7 @@ export const config: WebdriverIO.Config = {
   // Test files, each run in a separate worker process
   specs: ['./specs/**/*.ts'],
 
-  maxInstances: 10,
+  maxInstances: 4,
   capabilities: [
     {
       browserName: 'firefox',
