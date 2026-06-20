@@ -1,1 +1,4 @@
 /node_modules
+
+# Created by WebdriverIO, see `wdio.conf.ts`
+/cache-dir

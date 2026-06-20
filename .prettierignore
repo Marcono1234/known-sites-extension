@@ -1,0 +1,5 @@
+# Duplicate entries from `integration-tests/.gitignore` because Prettier does not consider
+# nested .gitignore files, see https://github.com/prettier/prettier/issues/17099 (?) and
+# https://github.com/prettier/prettier/blob/3.8.3/docs/ignore.md?plain=1#L27
+# > ... if it exists in the same directory from which it is run.
+/integration-tests/cache-dir

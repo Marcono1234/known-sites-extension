@@ -2,11 +2,12 @@
 
 import eslint from '@eslint/js'
 import ts_eslint from 'typescript-eslint'
-import { defineConfig } from 'eslint/config'
+import { defineConfig, globalIgnores } from 'eslint/config'
 import wdio_eslint from 'eslint-plugin-wdio'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
 
 export default defineConfig([
+  globalIgnores(['cache-dir/']),
   eslint.configs.recommended,
   ts_eslint.configs.recommendedTypeChecked,
   {

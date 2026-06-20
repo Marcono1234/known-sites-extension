@@ -48,6 +48,11 @@ jobs:
       # Run integration tests after having uploaded extension artifact, to allow inspecting it
       # in case of test failures
       # These steps are run in the same workflow job to access the previously built extension artifact
+      - name: Cache integration tests binaries
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ./integration-tests/cache-dir
+          key: ${{ runner.os }}-int-test-binaries-${{ hashFiles('./integration-tests/browser-config.json') }}
       - name: Install integration tests dependencies
         working-directory: ./integration-tests
         run: npm clean-install
