@@ -182,9 +182,7 @@ export namespace blockedPage {
         : domainText
     await expect(browser).toHaveTitle(en.windowTitle(expectedTitleDomain))
 
-    // TODO: Uses xPath selector `/...` here because CSS selector does not find `html` element
-    //   on older Firefox versions, see https://github.com/webdriverio/webdriverio/issues/15233
-    await expect($('/html')).toHaveAttribute('lang', en.htmlLang)
+    await expect($('html')).toHaveAttribute('lang', en.htmlLang)
 
     // Maybe improve this to better follow best practices at https://webdriver.io/docs/selectors/
 
