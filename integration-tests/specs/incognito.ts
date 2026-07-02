@@ -220,7 +220,6 @@ describe('incognito mode', () => {
 
     // Prepare handling of error dialog
     const dialogMessagePromise = new Promise((resolve, reject) =>
-      /* eslint-disable-next-line @typescript-eslint/no-misused-promises -- type declaration bug? https://github.com/webdriverio/webdriverio/issues/15276 */
       browser.on('dialog', async (dialog) => {
         const type = dialog.type()
         const message = dialog.message()
