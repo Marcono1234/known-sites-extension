@@ -209,12 +209,10 @@ export namespace blockedPage {
 
     if (nonAsciiDomainPieces === null) {
       await elementsNonAscii.forEach(
-        /* eslint-disable-next-line @typescript-eslint/no-misused-promises -- type declaration bug? https://github.com/webdriverio/webdriverio/issues/15275 */
         async (e) => await expect(e).not.toBeDisplayed(),
       )
     } else {
       await elementsNonAscii.forEach(
-        /* eslint-disable-next-line @typescript-eslint/no-misused-promises -- type declaration bug? https://github.com/webdriverio/webdriverio/issues/15275 */
         async (e) => await expect(e).toBeDisplayedInViewport(),
       )
 
