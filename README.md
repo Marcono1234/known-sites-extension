@@ -7,7 +7,7 @@ Users should however still be **vigilant when opening links**. This extension mi
 might be disabled in certain situations (e.g. in a Firefox private window, without the extension being enabled for
 Private Browsing), and might not be installed on all devices of the user.
 
-> [!WARNING]\
+> [!WARNING]
 > This is a hobby project and might not provide good protection. Do not rely on it for professional phishing protection.
 
 ## Usage
