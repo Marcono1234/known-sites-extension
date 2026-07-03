@@ -236,6 +236,7 @@ function initializePage(blockedPageParams: ExtPageUrlParams) {
     const openIncognito = e.altKey
 
     if (openIncognito && !canOpenIncognito) {
+      console.error('Cannot open website in incognito mode')
       alert(browser.i18n.getMessage('blocked_cannot_open_incognito'))
       return
     }

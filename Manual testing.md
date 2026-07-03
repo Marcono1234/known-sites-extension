@@ -79,7 +79,8 @@ _KNOWN_SITES_DEBUG = true
    :mag: The extension page should show the domain with non-ASCII characters replaced with `?` and highlighted in red
 2. Click the eye icon on the extension page\
    :mag: The eye icon should have become crossed out\
-   :mag: The domain should show the non-ASCII characters, highlighted in red
+   :mag: The domain should show the non-ASCII characters, highlighted in red\
+   :mag: The title of the tab should still show non-ASCII characters replaced with `?`
 3. Click the crossed out eye icon on the extension page\
    :mag: The original (non crossed out) eye icon should be shown again\
    :mag: The extension page should show `?` as replacement for non-ASCII characters again
@@ -242,8 +243,8 @@ The exact behavior of the extension regarding this does not matter since such UR
    ```
    :mag: The site should be blocked\
    :mag: The extension page should show the domain cut off on the _left_ side, with an ellipsis (`…`)\
-   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...bbbb.invalid"\
-   :mag: The title of the tab should show the domain cut off on the _left_; it should show "...bbbb.invalid"
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...bbb.invalid"\
+   :mag: The title of the tab should show the domain cut off on the _left_; it should show "...bbb.invalid"
 
 ### Long domain non-ASCII (❗)
 
@@ -254,11 +255,13 @@ The exact behavior of the extension regarding this does not matter since such UR
    :mag: The site should be blocked\
    :mag: Non-ASCII characters should be replaced with `?` and highlighted in red\
    :mag: The extension page should show the domain cut off on the _left_ side, with an ellipsis (`…`)\
-   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...???.invalid"
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...???.invalid"\
+   :mag: The title of the tab should show the domain cut off on the _left_; it should show "...???.invalid"
 2. Click the eye icon on the extension page\
    :mag: The domain should show the non-ASCII characters, highlighted in red\
    :mag: The domain should still be cut off on the _left_\
-   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...üüü.invalid"
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...üüü.invalid"\
+   :mag: The title of the tab should still show non-ASCII characters replaced with `?`
 
 ### Long domain non-ASCII, mixed (❗)
 
@@ -284,11 +287,12 @@ The exact behavior of the extension regarding this does not matter since such UR
    :mag: The site should be blocked\
    :mag: Non-ASCII characters should be replaced with `?` and highlighted in red\
    :mag: The extension page should show the domain cut off on the _left_ side, with an ellipsis (`…`)\
-   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...???.invalid"
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should show "...???.invalid"\
+   :mag: The title of the tab should show the domain cut off on the _left_; it should show "...???.invalid"
 2. Click the eye icon on the extension page\
    :mag: The domain should show the non-ASCII characters, highlighted in red\
    :mag: The domain should still be cut off on the _left_\
-   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; it should end with ".invalid"
+   :mag: The top-level domain (TLD) on the _right_ should _not_ be cut off; the domain should end with ".invalid"
 
 Note: The domain text might not be displayed in the expected right-to-left order; for now this is acceptable / desired.
 
