@@ -8,6 +8,9 @@ The following manual tests can be performed to verify that the extension works c
 perform them with a fresh browser profile, for example by starting the browser using `web-ext run` (see `package.json`
 scripts), to get consistent behavior. Make sure that you performed a build (`npm run package`) after your last changes.
 
+To test the actual built extension ZIP file (instead of the non-zipped extension files loaded by `web-ext run`),
+open `about:debugging#/runtime/this-firefox` and select to install a temporary add-on, see also the [Extension Workshop documentation](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/).
+
 In the following, 'unknown site' refers to a website which would by default be blocked by the extension because
 the user has never visited it before.
 
