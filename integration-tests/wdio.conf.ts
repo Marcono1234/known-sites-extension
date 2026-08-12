@@ -1,7 +1,6 @@
 import url from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs/promises'
-import { download as downloadGeckodriver } from 'geckodriver'
 
 import DummyHttpServerService from './services/dummy-http-server.ts'
 
@@ -87,9 +86,7 @@ import browserConfig from './browser-config.json' with { type: 'json' }
  * - make it more obvious where the binaries are stored (and how large they are)
  * - cache them in CI
  */
-// Include Geckodriver version as workaround for https://github.com/webdriverio-community/node-geckodriver/issues/731
-//   TODO: Omit subdir once that issue is fixed
-const CACHE_DIR = `cache-dir/geckodriver-${browserConfig.geckodriverVersion}`
+const CACHE_DIR = 'cache-dir'
 
 export const config: WebdriverIO.Config = {
   runner: 'local',
@@ -112,6 +109,7 @@ export const config: WebdriverIO.Config = {
       },
       'wdio:geckodriverOptions': {
         cacheDir: CACHE_DIR,
+        geckoDriverVersion: browserConfig.geckodriverVersion,
       },
     },
     // Separate configuration which runs a subset of the tests in a Firefox Private mode window
@@ -131,6 +129,7 @@ export const config: WebdriverIO.Config = {
       },
       'wdio:geckodriverOptions': {
         cacheDir: CACHE_DIR,
+        geckoDriverVersion: browserConfig.geckodriverVersion,
       },
       'wdio:specs': [
         // Only run a subset of all tests in Private mode
@@ -164,11 +163,6 @@ export const config: WebdriverIO.Config = {
   // Retry the whole spec (instead of individual tests) since the spec is stateful and might have modified browser
   // state already (e.g. cache of 'known sites' tracked by the extension)
   specFileRetries: 2,
-
-  onPrepare: async () => {
-    // Manually download driver (if it does not exist yet), as workaround for https://github.com/webdriverio/webdriverio/issues/15337
-    await downloadGeckodriver(browserConfig.geckodriverVersion, CACHE_DIR)
-  },
 
   // Note: If this fails, it might not actually cause test execution to fail, see https://github.com/webdriverio/webdriverio/issues/12138
   /** Executed before test execution */
