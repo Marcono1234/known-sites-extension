@@ -1,7 +1,11 @@
 import { expect, browser } from '@wdio/globals'
 import { describe } from 'mocha'
 
-import { blockedPage, translations } from '../src/test-helper.ts'
+import {
+  blockedPage,
+  registerDialogHandler,
+  translations,
+} from '../src/test-helper.ts'
 
 describe('malicious blocked page URL', () => {
   // Note: This test causes a warning to be logged in the webdriver logs, for the
@@ -17,27 +21,14 @@ describe('malicious blocked page URL', () => {
     }
 
     // Prepare handling of error dialog
-    const dialogMessagePromise = new Promise((resolve, reject) =>
-      browser.on('dialog', async (dialog) => {
-        const type = dialog.type()
-        const message = dialog.message()
-        if (type === 'confirm') {
-          resolve(message)
-        } else {
-          reject(
-            new Error(
-              `unexpected dialog type: ${type}; with message '${message}'`,
-            ),
-          )
-        }
-        // Dismiss dialog -> unknown site should not be reopened
-        await dialog.dismiss()
-      }),
+    const dialogPromise = registerDialogHandler(
+      'confirm',
+      translations.EN.errorIncorrectTokenInitialization,
+      // Dismiss dialog -> unknown site should not be reopened
+      (dialog) => dialog.dismiss(),
     )
     await browser.url(modifiedUrl)
-    expect(await dialogMessagePromise).toBe(
-      translations.EN.errorIncorrectTokenInitialization,
-    )
+    await dialogPromise
 
     await blockedPage.expectBlockedPageUrl()
 
@@ -70,27 +61,14 @@ describe('malicious blocked page URL', () => {
     }
 
     // Prepare handling of error dialog
-    const dialogMessagePromise = new Promise((resolve, reject) =>
-      browser.on('dialog', async (dialog) => {
-        const type = dialog.type()
-        const message = dialog.message()
-        if (type === 'confirm') {
-          resolve(message)
-        } else {
-          reject(
-            new Error(
-              `unexpected dialog type: ${type}; with message '${message}'`,
-            ),
-          )
-        }
-        // Accept dialog -> unknown site should be reopened
-        await dialog.accept()
-      }),
+    const dialogPromise = registerDialogHandler(
+      'confirm',
+      translations.EN.errorIncorrectTokenInitialization,
+      // Accept dialog -> unknown site should be reopened
+      (dialog) => dialog.accept(),
     )
     await browser.url(modifiedUrl)
-    expect(await dialogMessagePromise).toBe(
-      translations.EN.errorIncorrectTokenInitialization,
-    )
+    await dialogPromise
 
     // Should have opened blocked page with current (correct) token
     await expect(browser).not.toHaveUrl(modifiedUrl)

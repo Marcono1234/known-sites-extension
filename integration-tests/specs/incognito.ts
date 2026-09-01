@@ -4,6 +4,7 @@ import { describe } from 'mocha'
 
 import {
   blockedPage,
+  registerDialogHandler,
   runAsExtension,
   translations,
 } from '../src/test-helper.ts'
@@ -219,21 +220,10 @@ describe('incognito mode', () => {
     await browser.switchToWindow(handles.new)
 
     // Prepare handling of error dialog
-    const dialogMessagePromise = new Promise((resolve, reject) =>
-      browser.on('dialog', async (dialog) => {
-        const type = dialog.type()
-        const message = dialog.message()
-        if (type === 'alert') {
-          resolve(message)
-        } else {
-          reject(
-            new Error(
-              `unexpected dialog type: ${type}; with message '${message}'`,
-            ),
-          )
-        }
-        await dialog.dismiss()
-      }),
+    const dialogPromise = registerDialogHandler(
+      'alert',
+      translations.EN.errorCannotOpenIncognito,
+      (dialog) => dialog.dismiss(),
     )
 
     const domain = 'already-incognito.invalid'
@@ -250,9 +240,8 @@ describe('incognito mode', () => {
     )
 
     await clickOpenIncognito()
-    expect(await dialogMessagePromise).toBe(
-      translations.EN.errorCannotOpenIncognito,
-    )
+    await dialogPromise
+
     // Should still be blocked page
     await expectBlockedPage(domain, 'back', false)
 

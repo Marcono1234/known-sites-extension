@@ -28,6 +28,50 @@ export async function runAsExtension<T>(f: () => Promise<T>): Promise<T> {
   return result
 }
 
+/**
+ * Registers a handler for a browser dialog.
+ *
+ * @param dialogAction called when the dialog has the expected type and message; should either accept
+ *    or dismiss the dialog
+ * @returns promise which is resolved when the expected dialog appeared, and is rejected when an
+ *    unexpected dialog appeared
+ */
+export async function registerDialogHandler(
+  expectedType: 'alert' | 'confirm' | 'prompt',
+  expectedMessage: string,
+  dialogAction: (dialog: WebdriverIO.Dialog) => Promise<void>,
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    browser.on('dialog', async (dialog) => {
+      const type = dialog.type()
+      const message = dialog.message()
+
+      try {
+        expect(type).toBe(expectedType)
+        expect(message).toBe(expectedMessage)
+
+        await dialogAction(dialog)
+        resolve()
+      } catch (error) {
+        // Dismiss in case of wrong type or message; https://webdriver.io/docs/api/dialog/ says must always
+        // accept or dismiss to avoid freezing page
+        await dialog.dismiss()
+        // Reject afterwards, so dialog promise is only done when dialog has actually been dismissed already
+        // Assume that this is an instance of `Error`
+        /* eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors */
+        reject(error)
+      }
+    })
+  }).catch((error) => {
+    if (error instanceof Error) {
+      // Use the stack trace from the caller which awaits the promise result; otherwise the error has a stack trace
+      // from webdriver's event handling, making it difficult to know where `registerDialogHandler` was called
+      Error.captureStackTrace(error)
+    }
+    throw error
+  })
+}
+
 /** Translations of the extension UI */
 export namespace translations {
   export interface Translations {
