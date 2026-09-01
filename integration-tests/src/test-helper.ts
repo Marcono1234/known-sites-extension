@@ -286,8 +286,8 @@ export namespace blockedPage {
     expectedHtml: string,
   ) {
     await expect(element).toHaveHTML(expectedHtml, {
-      // @ts-expect-error: type declaration for `toHaveHTML` is wrong, see https://github.com/webdriverio/expect-webdriverio/issues/2089
       includeSelectorTag: false, // only check inner HTML
+      // @ts-expect-error: type declaration for `toHaveHTML` is missing some options, see https://github.com/webdriverio/expect-webdriverio/issues/2206
       prettify: false,
     })
   }
