@@ -147,7 +147,10 @@ function createHighlightedDomain(domain: string): HighlightResult | null {
 }
 
 /** Sends a message to the extension background script */
-function sendMessage(message: MessageData): Promise<void> {
+function sendMessage(
+  message: MessageData,
+  showIncorrectTokenAlert: boolean = true,
+): Promise<void> {
   return browser.runtime.sendMessage(message).then(
     (response: MessageResponse) => {
       if (response === 'success') {
@@ -159,7 +162,11 @@ function sendMessage(message: MessageData): Promise<void> {
       if (response === 'error') {
         alert(browser.i18n.getMessage('blocked_action_failed_error'))
       } else if (response === 'incorrect-token') {
-        alert(browser.i18n.getMessage('blocked_action_failed_incorrect_token'))
+        if (showIncorrectTokenAlert) {
+          alert(
+            browser.i18n.getMessage('blocked_action_failed_incorrect_token'),
+          )
+        }
       } else {
         response satisfies never // ensure that if-else is exhaustive
       }
@@ -186,9 +193,33 @@ document.addEventListener('DOMContentLoaded', () => {
   // To be safe, check token before using any of the URL parameters, since they could
   // be forged by a malicious website
   const token = blockedPageParams.token
-  sendMessage({ action: 'check-token', token: token })
+  sendMessage(
+    { action: 'check-token', token: token },
+    // Don't show alert; instead show custom dialog below
+    false,
+  )
     .then(() => initializePage(blockedPageParams))
-    .catch((error) => console.error('Failed initializing page', error))
+    .catch((error) => {
+      console.error(
+        'Failed initializing page; asking user for reopening unknown site',
+        error,
+      )
+
+      // If initialization failed due to incorrect token (most likely when blocked page stayed open
+      // during browser restart), ask user whether to open original unknown site again
+      // This should solve the issue: the site is probably still unknown and the extension uses
+      // now the current (correct) token for the blocked page
+      // Note: This explicitly asks the user instead of reopening automatically to avoid an infinite
+      // reopen loop in case there is a bug and the token is still incorrect
+      const reopenSite = confirm(
+        browser.i18n.getMessage('initialize_failed_incorrect_token_dialog'),
+      )
+      console.info(`User choice for reopening site: ${reopenSite}`)
+      if (reopenSite) {
+        // Use `replace` to remove the previous blocked page URL with incorrect token from the navigation history
+        window.location.replace(blockedPageParams.url)
+      }
+    })
 })
 
 function initializePage(blockedPageParams: ExtPageUrlParams) {

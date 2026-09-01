@@ -360,17 +360,35 @@ Note: The domain text might not be displayed in the expected right-to-left order
    :mag: This time the extension page should mention that non-ASCII characters were detected\
    Clicking on the eye icon should not cause any of the events described in step 3 either
 
-### Invalid token (❗)
+### Invalid token, cancel reopen (❗)
 
 1. Open an unknown site, for example `example.com`\
    :mag: The site should be blocked
 2. Edit the URL of the 'blocked page' (`moz-extension://...` or `chrome-extension://...`):\
    Modify the `token` URL parameter value, for example switch one letter
 3. Open the modified URL\
-   :mag: A dialog should appear saying that the token is incorrect\
+   :mag: A dialog should appear saying that the token is incorrect, and asking whether to reopen the unknown site
+4. Cancel the dialog\
+   :mag: The extension page should stay open (with empty text fields)\
    :mag: The buttons of the extension page should do nothing / should show a dialog as well, but should not open any pages
-4. Repeat steps 2 & 3, this time completely removing the `token` parameter\
+5. Repeat steps 2 & 3, this time completely removing the `token` parameter\
    :mag: The same behavior as in step 3 should be observable
+
+### Invalid token, reopen (❗)
+
+1. Open an unknown site, for example `example.com`\
+   :mag: The site should be blocked
+2. Edit the URL of the 'blocked page' (`moz-extension://...` or `chrome-extension://...`):\
+   Modify the `token` URL parameter value, for example switch one letter
+3. Open the modified URL _in a new tab_ (makes later steps for checking the history easier)\
+   :mag: A dialog should appear saying that the token is incorrect, and asking whether to reopen the unknown site
+4. Click "Ok" on the dialog\
+   :mag: The unknown site should be opened again, and again be blocked\
+   :mag: The extension page should properly load, and not show a dialog about an incorrect token
+5. Check the browser history backward navigation button\
+   :mag: The extension page with incorrect token should not be listed
+6. Click the "Open" button of the extension page\
+   :mag: The unknown site should be opened
 
 ### Incognito / Private mode (Chrome) (❗)
 

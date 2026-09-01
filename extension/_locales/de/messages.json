@@ -86,5 +86,8 @@
   },
   "blocked_action_failed_incorrect_token": {
     "message": "Aktion ist fehlgeschlagen. (Falsches Token)"
+  },
+  "initialize_failed_incorrect_token_dialog": {
+    "message": "Laden der Erweiterungsseite ist fehlgeschlagen (falsches Token).\nSoll versucht werden die unbekannte Webseite erneut zu öffnen?"
   }
 }

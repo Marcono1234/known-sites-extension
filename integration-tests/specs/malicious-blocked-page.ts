@@ -6,9 +6,9 @@ import { blockedPage, translations } from '../src/test-helper.ts'
 describe('malicious blocked page URL', () => {
   // Note: This test causes a warning to be logged in the webdriver logs, for the
   // intentional error message from the extension page
-  it('wrong token', async () => {
-    await browser.url('https://invalid.invalid')
-    await blockedPage.expectBlockedPage('invalid.invalid')
+  it('wrong token, no reopen', async () => {
+    await browser.url('https://wrong-token.invalid')
+    await blockedPage.expectBlockedPage('wrong-token.invalid')
     const url = await browser.getUrl()
     // Insert 'a' in front of token
     const modifiedUrl = url.replace('token=', 'token=a')
@@ -21,7 +21,7 @@ describe('malicious blocked page URL', () => {
       browser.on('dialog', async (dialog) => {
         const type = dialog.type()
         const message = dialog.message()
-        if (type === 'alert') {
+        if (type === 'confirm') {
           resolve(message)
         } else {
           reject(
@@ -30,11 +30,14 @@ describe('malicious blocked page URL', () => {
             ),
           )
         }
+        // Dismiss dialog -> unknown site should not be reopened
         await dialog.dismiss()
       }),
     )
     await browser.url(modifiedUrl)
-    expect(await dialogMessagePromise).toBe(translations.EN.errorIncorrectToken)
+    expect(await dialogMessagePromise).toBe(
+      translations.EN.errorIncorrectTokenInitialization,
+    )
 
     await blockedPage.expectBlockedPageUrl()
 
@@ -49,6 +52,62 @@ describe('malicious blocked page URL', () => {
 
     await blockedPage.buttonRevert().click()
     await blockedPage.expectBlockedPageUrl()
+  })
+
+  // Tests behavior when blocked page has wrong token, and user chooses to reopen unknown site
+  // Note: This test causes a warning to be logged in the webdriver logs, for the
+  // intentional error message from the extension page
+  it('wrong token, reopen', async () => {
+    const unknownUrl =
+      'https://wrong-token-reopen.invalid/test?test=%C3%A4#section'
+    await browser.url(unknownUrl)
+    await blockedPage.expectBlockedPage('wrong-token-reopen.invalid')
+    const url = await browser.getUrl()
+    // Insert 'a' in front of token
+    const modifiedUrl = url.replace('token=', 'token=a')
+    if (modifiedUrl === url) {
+      throw new Error('failed to replace token')
+    }
+
+    // Prepare handling of error dialog
+    const dialogMessagePromise = new Promise((resolve, reject) =>
+      browser.on('dialog', async (dialog) => {
+        const type = dialog.type()
+        const message = dialog.message()
+        if (type === 'confirm') {
+          resolve(message)
+        } else {
+          reject(
+            new Error(
+              `unexpected dialog type: ${type}; with message '${message}'`,
+            ),
+          )
+        }
+        // Accept dialog -> unknown site should be reopened
+        await dialog.accept()
+      }),
+    )
+    await browser.url(modifiedUrl)
+    expect(await dialogMessagePromise).toBe(
+      translations.EN.errorIncorrectTokenInitialization,
+    )
+
+    // Should have opened blocked page with current (correct) token
+    await expect(browser).not.toHaveUrl(modifiedUrl)
+    await blockedPage.expectBlockedPage('wrong-token-reopen.invalid', 'back')
+
+    await blockedPage.buttonOpen().click()
+    // Should have opened blocked URL
+    await expect(browser).toHaveUrl(unknownUrl)
+
+    // TODO: This does not work; in the launched browser the navigation works correctly, but somehow
+    // for this `back()` call webdriver seems to erroneously stay on the current URL (and duplicate
+    // it in history?); can be seen when using `await browser.pause(...)` after `back()` for debugging
+    /*
+    await browser.back()
+    // Should have opened original blocked page, not the one with wrong token
+    await blockedPage.expectBlockedPage('wrong-token-reopen.invalid')
+    */
   })
 
   // Note: It is unlikely that (1) a modified blocked page URL is opened because it looks like websites

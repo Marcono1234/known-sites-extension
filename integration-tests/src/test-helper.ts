@@ -65,8 +65,8 @@ export namespace translations {
     hintIncognitoHtml: string
 
     errorCannotOpenIncognito: string
-    /** Error message for incorrect token */
-    errorIncorrectToken: string
+    /** Error message for incorrect token dialog during initialization of blocked page */
+    errorIncorrectTokenInitialization: string
   }
 
   /** English translations */
@@ -112,7 +112,8 @@ export namespace translations {
       "Hint: Hold the <kbd>Alt</kbd> key while clicking the 'Open' button to open the website in a new Incognito / Private window.",
 
     errorCannotOpenIncognito: 'Incognito / Private window cannot be opened',
-    errorIncorrectToken: 'Action failed. (incorrect token)',
+    errorIncorrectTokenInitialization:
+      'Loading the extension page failed (incorrect token).\nTry to reopen the unknown website?',
   }
 }
 

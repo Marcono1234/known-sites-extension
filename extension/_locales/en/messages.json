@@ -96,5 +96,8 @@
   },
   "blocked_action_failed_incorrect_token": {
     "message": "Action failed. (incorrect token)"
+  },
+  "initialize_failed_incorrect_token_dialog": {
+    "message": "Loading the extension page failed (incorrect token).\nTry to reopen the unknown website?"
   }
 }
