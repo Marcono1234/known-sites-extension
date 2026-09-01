@@ -17,6 +17,6 @@
   },
   "scripts": {
     "wdio": "wdio run ./wdio.conf.ts",
-    "lint": "npx eslint --config ./eslint.config.mjs ."
+    "lint": "npx tsc --noEmit && npx eslint --config ./eslint.config.mjs ."
   }
 }
