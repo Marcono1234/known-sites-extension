@@ -29,6 +29,24 @@ export async function runAsExtension<T>(f: () => Promise<T>): Promise<T> {
 }
 
 /**
+ * Registers a listener for the 'dialog' event, to be invoked at most once.
+ *
+ * Workaround for https://github.com/webdriverio/webdriverio/issues/15558
+ */
+// TODO: Remove once webdriver bug is fixed
+export function onceDialog(
+  listener: (dialog: WebdriverIO.Dialog) => Promise<void>,
+) {
+  const wrappingListener = async (dialog: WebdriverIO.Dialog) => {
+    // Disable lint; inconsistent with `browser.on`, `browser.off` type declaration does not support async listener
+    /* eslint-disable-next-line @typescript-eslint/no-misused-promises */
+    browser.off('dialog', wrappingListener)
+    await listener(dialog)
+  }
+  browser.on('dialog', wrappingListener)
+}
+
+/**
  * Registers a handler for a browser dialog.
  *
  * @param dialogAction called when the dialog has the expected type and message; should either accept
@@ -42,7 +60,7 @@ export async function registerDialogHandler(
   dialogAction: (dialog: WebdriverIO.Dialog) => Promise<void>,
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    browser.on('dialog', async (dialog) => {
+    onceDialog(async (dialog) => {
       const type = dialog.type()
       const message = dialog.message()
 

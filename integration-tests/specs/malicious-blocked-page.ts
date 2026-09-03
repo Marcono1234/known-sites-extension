@@ -3,6 +3,7 @@ import { describe } from 'mocha'
 
 import {
   blockedPage,
+  onceDialog,
   registerDialogHandler,
   translations,
 } from '../src/test-helper.ts'
@@ -117,7 +118,7 @@ describe('malicious blocked page URL', () => {
     }
 
     let htmlInjectionMessage: string | null = null
-    browser.on('dialog', async (dialog) => {
+    onceDialog(async (dialog) => {
       // Also specify a fallback message in case `message()` is for whatever reason null,
       // to still detect that dialog appeared
       htmlInjectionMessage = dialog.message() || 'no message'
