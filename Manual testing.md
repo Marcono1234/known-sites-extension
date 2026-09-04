@@ -390,6 +390,22 @@ Note: The domain text might not be displayed in the expected right-to-left order
 6. Click the "Open" button of the extension page\
    :mag: The unknown site should be opened
 
+### Invalid token, unsupported URL (❗)
+
+1. Open an unknown site, for example `example.com`\
+   :mag: The site should be blocked
+2. Edit the URL of the 'blocked page' (`moz-extension://...` or `chrome-extension://...`):
+   - Modify the `token` URL parameter value, for example switch one letter
+   - Change the `url` URL parameter to `javascript:alert(1)`
+3. Open the modified URL\
+   :mag: A dialog should appear saying that the token is incorrect\
+   :mag: The dialog should _not_ offer to reopen the unknown site
+4. Open the console\
+   :mag: It should include a message about the URL protocol being unsupported
+5. Close the dialog\
+   :mag: The extension page should stay open (with empty text fields)\
+   :mag: The buttons of the extension page should do nothing / should show a dialog as well, but should not open any pages
+
 ### Incognito / Private mode (Chrome) (❗)
 
 1. Open the extension settings and allow usage in Incognito windows

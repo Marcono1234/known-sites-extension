@@ -89,6 +89,52 @@ describe('malicious blocked page URL', () => {
     */
   })
 
+  // Tests behavior when blocked page has wrong token, and URL protocol of unknown site is unsupported
+  // Note: This test causes a warning to be logged in the webdriver logs, for the
+  // intentional error message from the extension page
+  it('wrong token, unsupported URL', async () => {
+    await browser.url('https://wrong-token-unsupported-url.invalid')
+    await blockedPage.expectBlockedPage('wrong-token-unsupported-url.invalid')
+    const url = await browser.getUrl()
+    // Insert 'a' in front of token
+    const wrongTokenUrl = url.replace('token=', 'token=a')
+    if (wrongTokenUrl === url) {
+      throw new Error('failed to replace token')
+    }
+    const modifiedUrl = wrongTokenUrl.replace(
+      /url=.*?&/,
+      'url=javascript:alert(1)&',
+    )
+    if (modifiedUrl === wrongTokenUrl) {
+      throw new Error('failed to replace URL')
+    }
+
+    // Prepare handling of error dialog
+    const dialogPromise = registerDialogHandler(
+      // Unlike the other "incorrect token" dialogs, this should be an 'alert' dialog which the user can
+      // only cancel, but not accept
+      'alert',
+      translations.EN.errorIncorrectToken,
+      (dialog) => dialog.dismiss(),
+    )
+    await browser.url(modifiedUrl)
+    await dialogPromise
+
+    await blockedPage.expectBlockedPageUrl()
+
+    // Current implementation leaves UI uninitialized in case of incorrect token
+    await expect(blockedPage.displayedDomainElement()).toHaveText('')
+    await expect(blockedPage.buttonOpen()).toHaveText('')
+    await expect(blockedPage.buttonRevert()).toHaveText('')
+
+    // Clicking the buttons should have no effect
+    await blockedPage.buttonOpen().click()
+    await blockedPage.expectBlockedPageUrl()
+
+    await blockedPage.buttonRevert().click()
+    await blockedPage.expectBlockedPageUrl()
+  })
+
   // Note: It is unlikely that (1) a modified blocked page URL is opened because it looks like websites
   //   cannot open extension pages, and (2) even more unlikely that it will have the correct 'token'
   //   However, in case that is somehow possible, the following test verifies that at least no HTML injection

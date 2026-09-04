@@ -1,5 +1,8 @@
 // Code which is shared between the page content script and the background script
 
+/** URL protocols (lowercase, with trailing ':') which are checked by the extension */
+export const SUPPORTED_PROTOCOLS = ['http:', 'https:']
+
 type BaseMessage<A extends string> = {
   action: A
   token: string

@@ -3,14 +3,12 @@ import { LRUCache } from 'lru-cache'
 // Use trailing slash to avoid import Node module
 import * as punycode from 'punycode/'
 import {
+  SUPPORTED_PROTOCOLS,
   MessageData,
   MessageDataOpenUrl,
   MessageResponse,
   toPageUrlParamsString,
 } from '../../common-src/common'
-
-/** URL protocols (lowercase, with trailing ':') which are checked by the extension */
-const SUPPORTED_PROTOCOLS = ['http:', 'https:']
 
 /**
  * Whether the browser is Firefox. If it cannot be determined, then the value is `false`.
@@ -195,11 +193,8 @@ browser.runtime.onMessage.addListener(
 
     const token = message.token
     if (token !== TOKEN) {
-      console.error(
-        `Received incorrect token, expected ${TOKEN}`,
-        message,
-        sender,
-      )
+      console.error('Received incorrect token', message, sender)
+      logDebug(`Expected token: ${TOKEN}`)
       return 'incorrect-token'
     }
 

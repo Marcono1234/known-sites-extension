@@ -3,6 +3,7 @@ import {
   fromPageUrlParams,
   MessageData,
   MessageResponse,
+  SUPPORTED_PROTOCOLS,
 } from '../../common-src/common'
 
 // Based on https://github.com/EFForg/https-everywhere/blob/579b8c59d078fd65d547a546b381c9ae45c61232/chromium/pages/translation.js
@@ -190,34 +191,67 @@ document.addEventListener('DOMContentLoaded', () => {
     new URLSearchParams(window.location.search),
   )
 
+  // Important: This URL should be treated 'untrusted' until any further checks (token, URL protocol, ...)
+  // have been performed; otherwise the URL could have any protocol, even one which is not supported by the
+  // extension, and a malicious website might be able to exploit that by having the extension open a URL
+  // which the website itself cannot open due to restrictions by the browser
+  const blockedUrl_Untrusted = blockedPageParams.url
+  let reopenableBlockedUrl: URL | null = null
+  try {
+    const url = new URL(blockedUrl_Untrusted)
+    const protocol = url.protocol.toLowerCase()
+    // Reject unsupported URL protocols, such as malicious `javascript:alert(...)` or `file:///...`
+    // While it seems the browser prevents those for `location.replace` itself as well, it is probably
+    // better to check this explicitly here
+    if (SUPPORTED_PROTOCOLS.includes(protocol)) {
+      reopenableBlockedUrl = url
+    } else {
+      console.error(
+        `Blocked URL has unsupported protocol: ${blockedUrl_Untrusted}`,
+      )
+    }
+  } catch (error) {
+    console.error(`Failed parsing blocked URL: ${blockedUrl_Untrusted}`, error)
+  }
+
   // To be safe, check token before using any of the URL parameters, since they could
   // be forged by a malicious website
   const token = blockedPageParams.token
   sendMessage(
     { action: 'check-token', token: token },
-    // Don't show alert; instead show custom dialog below
-    false,
+    // Only show alert if URL cannot be reopened; otherwise show custom dialog below
+    reopenableBlockedUrl === null,
   )
     .then(() => initializePage(blockedPageParams))
     .catch((error) => {
-      console.error(
-        'Failed initializing page; asking user for reopening unknown site',
-        error,
-      )
+      if (reopenableBlockedUrl === null) {
+        console.error(
+          'Failed initializing page, and unknown site cannot be reopened',
+          error,
+        )
+      } else {
+        console.error(
+          'Failed initializing page; asking user for reopening unknown site',
+          error,
+        )
 
-      // If initialization failed due to incorrect token (most likely when blocked page stayed open
-      // during browser restart), ask user whether to open original unknown site again
-      // This should solve the issue: the site is probably still unknown and the extension uses
-      // now the current (correct) token for the blocked page
-      // Note: This explicitly asks the user instead of reopening automatically to avoid an infinite
-      // reopen loop in case there is a bug and the token is still incorrect
-      const reopenSite = confirm(
-        browser.i18n.getMessage('initialize_failed_incorrect_token_dialog'),
-      )
-      console.info(`User choice for reopening site: ${reopenSite}`)
-      if (reopenSite) {
-        // Use `replace` to remove the previous blocked page URL with incorrect token from the navigation history
-        window.location.replace(blockedPageParams.url)
+        // If initialization failed due to incorrect token (most likely when blocked page stayed open
+        // during browser restart), ask user whether to open original unknown site again
+        // This should solve the issue: the site is probably still unknown and the extension uses
+        // now the current (correct) token for the blocked page
+        // Note: This explicitly asks the user instead of reopening automatically to avoid an infinite
+        // reopen loop in case there is a bug and the token is still incorrect
+        const reopenSite = confirm(
+          browser.i18n.getMessage('initialize_failed_incorrect_token_dialog'),
+        )
+        console.info(`User choice for reopening site: ${reopenSite}`)
+        if (reopenSite) {
+          // Use `replace` to remove the previous blocked page URL with incorrect token from the navigation history
+          window.location.replace(reopenableBlockedUrl)
+        } else {
+          // Do nothing; keep uninitialized blocked page open
+          // Cannot perform revert (go back or close tab) because 'close-tab' message requires a valid token
+        }
       }
     })
 })
