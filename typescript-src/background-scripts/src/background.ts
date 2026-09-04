@@ -8,6 +8,7 @@ import {
   MessageDataOpenUrl,
   MessageResponse,
   toPageUrlParamsString,
+  safeConsole,
 } from '../../common-src/common'
 
 /**
@@ -19,16 +20,16 @@ const IS_FIREFOX: Promise<boolean> = (
     : browser.runtime.getBrowserInfo().then(
         (browserInfo) => {
           const browserName = browserInfo.name
-          console.debug(`Browser name: ${browserName}`)
+          safeConsole.debug(`Browser name: ${browserName}`)
           return browserName.includes('Firefox')
         },
         (error) => {
-          console.warn('Failed getting browser info', error)
+          safeConsole.warn('Failed getting browser info', error)
           return false
         },
       )
 ).then((isFirefox) => {
-  console.debug(`Is browser Firefox: ${isFirefox}`)
+  safeConsole.debug(`Is browser Firefox: ${isFirefox}`)
   return isFirefox
 })
 
@@ -55,7 +56,7 @@ function logDebug(message: string, ...args: unknown[]) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const enabled = (window as any)._KNOWN_SITES_DEBUG
   if (enabled === true) {
-    console.debug(message, ...args)
+    safeConsole.debug(message, ...args)
   }
 }
 
@@ -125,7 +126,7 @@ browser.windows.onCreated.addListener((newWindow) => {
     }
   }
   handler().catch((error) =>
-    console.error('Failed handling window creation event', error),
+    safeConsole.error('Failed handling window creation event', error),
   )
 })
 browser.windows.onRemoved.addListener((windowId) => {
@@ -141,7 +142,7 @@ browser.windows.onRemoved.addListener((windowId) => {
     }
   }
   handler().catch((error) =>
-    console.error('Failed handling window removal event', error),
+    safeConsole.error('Failed handling window removal event', error),
   )
 })
 
@@ -183,17 +184,17 @@ browser.history.onVisitRemoved.addListener((removed) => {
 // Handle messages from the extension blocking page
 browser.runtime.onMessage.addListener(
   async (message: MessageData, sender): Promise<MessageResponse> => {
-    console.debug(`Received '${message.action}' message`)
+    safeConsole.debug(`Received '${message.action}' message`)
 
     const tabId = sender.tab?.id
     if (tabId === undefined) {
-      console.error('Failed to get tab ID', sender)
+      safeConsole.error('Failed to get tab ID', sender)
       return 'error'
     }
 
     const token = message.token
     if (token !== TOKEN) {
-      console.error('Received incorrect token', message, sender)
+      safeConsole.error('Received incorrect token', message, sender)
       logDebug(`Expected token: ${TOKEN}`)
       return 'incorrect-token'
     }
@@ -210,7 +211,7 @@ browser.runtime.onMessage.addListener(
     } else {
       action satisfies never // ensure that if-else is exhaustive
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- permit `action` as `never` in template (in reality it would be a string)
-      console.error(`Unknown message action: ${action}`, message, sender)
+      safeConsole.error(`Unknown message action: ${action}`, message, sender)
       return 'error'
     }
 
@@ -282,7 +283,7 @@ function parseDomain(
   try {
     parsedUrl = new URL(url)
   } catch (error) {
-    console.error(`Failed parsing URL ${url}`, error)
+    safeConsole.error(`Failed parsing URL ${url}`, error)
     // Fall back to using complete URL as domain
     return url
   }
@@ -295,7 +296,7 @@ function parseDomain(
     } else {
       // Should normally not happen; if unsupported protocol is expected to occur, then
       // caller should have set `ignoreUnsupportedProtocol = true`
-      console.error(`URL has unsupported protocol '${protocol}'`, url)
+      safeConsole.error(`URL has unsupported protocol '${protocol}'`, url)
       // Fall back to using complete URL as domain
       return url
     }
@@ -303,7 +304,7 @@ function parseDomain(
 
   const hostname = parsedUrl.hostname
   if (hostname === '') {
-    console.error(`URL ${url} has no hostname`)
+    safeConsole.error(`URL has no hostname: ${url}`)
     // Fall back to using complete URL as domain
     return url
   }
@@ -323,7 +324,7 @@ function parseDomain(
   // See also https://webmasters.stackexchange.com/q/73934
   if (hostname.endsWith('.')) {
     // Log warning because domain with trailing dot is rather uncommon, so this might be an attempted attack
-    console.warn(`Domain has trailing dot: ${hostname}`)
+    safeConsole.warn(`Domain has trailing dot: ${hostname}`)
     return hostname
   }
 
@@ -336,7 +337,9 @@ function parseDomain(
   else if (pslDomain === hostname || hostname.endsWith('.' + pslDomain)) {
     return pslDomain
   } else {
-    console.warn(`PSL domain ${pslDomain} does not match hostname ${hostname}`)
+    safeConsole.warn(
+      `PSL domain ${pslDomain} does not match hostname ${hostname}`,
+    )
     return hostname
   }
 }
@@ -352,13 +355,13 @@ function parseOrigin(url: string): string {
   try {
     origin = new URL(url).origin
   } catch (error) {
-    console.error(`Failed parsing URL ${url}`, error)
+    safeConsole.error(`Failed parsing URL ${url}`, error)
     // Fall back to using complete URL as origin
     return url
   }
   // 'null' is used as "opaque origin", see https://html.spec.whatwg.org/multipage/origin.html#concept-origin-opaque
   if (origin === '' || origin === 'null') {
-    console.error(`URL ${url} has no origin`)
+    safeConsole.error(`URL has no origin: ${url}`)
     // Fall back to using complete URL as origin
     return url
   }
@@ -504,7 +507,7 @@ async function handleRequest(
   // to check in which situations it occurs and whether the request should be blocked in these situations
   if (requestDetails.tabId == browser.tabs.TAB_ID_NONE && !(await IS_FIREFOX)) {
     logDebug(`Detected implicit request for ${url}`)
-    console.debug('Allowing request which is not related to a tab')
+    safeConsole.debug('Allowing request which is not related to a tab')
     return {}
   }
 
@@ -519,7 +522,10 @@ async function handleRequest(
   try {
     nonPunycodeDomain = punycode.toUnicode(rawDomain)
   } catch (error) {
-    console.error(`Punycode conversion failed for domain ${rawDomain}`, error)
+    safeConsole.error(
+      `Punycode conversion failed for domain ${rawDomain}`,
+      error,
+    )
     // If conversion failed; domain might be malformed and handling of it might be
     // browser specific; to be safe cancel loading
     return { cancel: true }

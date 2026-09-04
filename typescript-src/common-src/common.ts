@@ -1,5 +1,40 @@
 // Code which is shared between the page content script and the background script
 
+/**
+ * Exposes the same functions as `console`, but treats the `message` argument always literally
+ * instead of treating substrings like `%d` as "substitution string".
+ */
+export const safeConsole = {
+  // All these functions log the `message` with "%s" and then let the browser log additional
+  // args (if any) separately, as described in the `console` documentation
+  // This allows using template literals (`... ${...}`) without risking that they include
+  // accidental or malicious substitution strings
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  debug: (message: string, ...additionalArgs: any[]) => {
+    // eslint-disable-next-line no-console, @typescript-eslint/no-unsafe-argument
+    console.debug('%s', message, ...additionalArgs)
+  },
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  info: (message: string, ...additionalArgs: any[]) => {
+    // eslint-disable-next-line no-console, @typescript-eslint/no-unsafe-argument
+    console.info('%s', message, ...additionalArgs)
+  },
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  warn: (message: string, ...additionalArgs: any[]) => {
+    // eslint-disable-next-line no-console, @typescript-eslint/no-unsafe-argument
+    console.warn('%s', message, ...additionalArgs)
+  },
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error: (message: string, ...additionalArgs: any[]) => {
+    // eslint-disable-next-line no-console, @typescript-eslint/no-unsafe-argument
+    console.error('%s', message, ...additionalArgs)
+  },
+}
+
 /** URL protocols (lowercase, with trailing ':') which are checked by the extension */
 export const SUPPORTED_PROTOCOLS = ['http:', 'https:']
 

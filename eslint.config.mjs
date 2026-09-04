@@ -32,6 +32,10 @@ export default defineConfig([
           reportUnusedDisableDirectives: 'error',
           reportUnusedInlineConfigs: 'error',
         },
+        rules: {
+          // Disallow direct usage of `console`; instead use `safeConsole` from `/common-src/common.ts`
+          'no-console': 'error',
+        },
       },
       // Disable rules which conflict with Prettier
       eslintConfigPrettier,

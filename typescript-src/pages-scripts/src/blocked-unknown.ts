@@ -3,6 +3,7 @@ import {
   fromPageUrlParams,
   MessageData,
   MessageResponse,
+  safeConsole,
   SUPPORTED_PROTOCOLS,
 } from '../../common-src/common'
 
@@ -22,13 +23,13 @@ function setI18nContent() {
     for (const element of document.querySelectorAll(`[${attrName}]`)) {
       const attrValue = element.getAttribute(attrName)
       if (attrValue === null) {
-        console.error(`Missing attribute ${attrName}`, element)
+        safeConsole.error(`Missing attribute ${attrName}`, element)
         continue
       }
 
       const message = browser.i18n.getMessage(attrValue)
       if (message === '') {
-        console.error(`Missing translation for ${attrValue}`)
+        safeConsole.error(`Missing translation for ${attrValue}`)
       } else {
         callback(element, message)
       }
@@ -155,11 +156,15 @@ function sendMessage(
   return browser.runtime.sendMessage(message).then(
     (response: MessageResponse) => {
       if (response === 'success') {
-        console.debug(`Message '${message.action}' was successfully processed`)
+        safeConsole.debug(
+          `Message '${message.action}' was successfully processed`,
+        )
         return
       }
 
-      console.error(`Message '${message.action}' was unsuccessful: ${response}`)
+      safeConsole.error(
+        `Message '${message.action}' was unsuccessful: ${response}`,
+      )
       if (response === 'error') {
         alert(browser.i18n.getMessage('blocked_action_failed_error'))
       } else if (response === 'incorrect-token') {
@@ -206,12 +211,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (SUPPORTED_PROTOCOLS.includes(protocol)) {
       reopenableBlockedUrl = url
     } else {
-      console.error(
+      safeConsole.error(
         `Blocked URL has unsupported protocol: ${blockedUrl_Untrusted}`,
       )
     }
   } catch (error) {
-    console.error(`Failed parsing blocked URL: ${blockedUrl_Untrusted}`, error)
+    safeConsole.error(
+      `Failed parsing blocked URL: ${blockedUrl_Untrusted}`,
+      error,
+    )
   }
 
   // To be safe, check token before using any of the URL parameters, since they could
@@ -225,12 +233,12 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(() => initializePage(blockedPageParams))
     .catch((error) => {
       if (reopenableBlockedUrl === null) {
-        console.error(
+        safeConsole.error(
           'Failed initializing page, and unknown site cannot be reopened',
           error,
         )
       } else {
-        console.error(
+        safeConsole.error(
           'Failed initializing page; asking user for reopening unknown site',
           error,
         )
@@ -244,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const reopenSite = confirm(
           browser.i18n.getMessage('initialize_failed_incorrect_token_dialog'),
         )
-        console.info(`User choice for reopening site: ${reopenSite}`)
+        safeConsole.info(`User choice for reopening site: ${reopenSite}`)
         if (reopenSite) {
           // Use `replace` to remove the previous blocked page URL with incorrect token from the navigation history
           window.location.replace(reopenableBlockedUrl)
@@ -278,14 +286,14 @@ function initializePage(blockedPageParams: ExtPageUrlParams) {
   } else {
     revertButtonText = browser.i18n.getMessage('blocked_button_close_tab')
     revertButtonAction = () => {
-      console.info('Sending message to close blocked page tab')
+      safeConsole.info('Sending message to close blocked page tab')
 
       // window.close() only seems to work when tab was opened by script
       // Therefore let extension close the tab
       sendMessage({
         action: 'close-tab',
         token: token,
-      }).catch((error) => console.error('Failed closing tab', error))
+      }).catch((error) => safeConsole.error('Failed closing tab', error))
     }
   }
 
@@ -301,12 +309,14 @@ function initializePage(blockedPageParams: ExtPageUrlParams) {
     const openIncognito = e.altKey
 
     if (openIncognito && !canOpenIncognito) {
-      console.error('Cannot open website in incognito mode')
+      safeConsole.error('Cannot open website in incognito mode')
       alert(browser.i18n.getMessage('blocked_cannot_open_incognito'))
       return
     }
 
-    console.info(`Sending message to open URL; openIncognito: ${openIncognito}`)
+    safeConsole.info(
+      `Sending message to open URL; openIncognito: ${openIncognito}`,
+    )
 
     // Send message to let extension first add domain to cache and then open
     // it (to avoid immediately blocking it again), and also to validate token
@@ -326,7 +336,9 @@ function initializePage(blockedPageParams: ExtPageUrlParams) {
       // Afterwards perform 'revert' action since URL was opened in new incognito window
       openUrlPromise = openUrlPromise.then(() => revertButtonAction())
     }
-    openUrlPromise.catch((error) => console.error('Failed opening URL', error))
+    openUrlPromise.catch((error) =>
+      safeConsole.error('Failed opening URL', error),
+    )
   })
 
   if (canOpenIncognito) {
